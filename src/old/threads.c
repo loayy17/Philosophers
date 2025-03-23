@@ -1,13 +1,5 @@
 #include "philo.h"
 
-void print_msg(t_philo *philo, char *msg)
-{
-    pthread_mutex_lock(&philo->data->print_lock);
-    if (!is_dead(philo->data))
-        printf("%ld %d %s\n", get_time() - philo->data->start_time, philo->id, msg);
-    pthread_mutex_unlock(&philo->data->print_lock);
-}
-
 int create_threads(t_data *data)
 {
     int i;
@@ -29,5 +21,6 @@ void join_threads(t_data *data)
 
     i = -1;
     while(++i < data->n_philos)
-        pthread_join(data->philo[i].thread, NULL);
+        if (pthread_join(data->philo[i].thread, NULL) != 0)
+            return ;   
 }

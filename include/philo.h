@@ -33,7 +33,7 @@ typedef struct s_philo
 	t_data			*data;
 }					t_philo;
 
-enum e_mutex
+enum				e_mutex
 {
 	NONE,
 	FORK,
@@ -64,13 +64,10 @@ void				*philo_routine(void *arg);
 // Utils
 int					ft_atoi(const char *str);
 int					ft_isdigit(int c);
-void				print_message(t_philo *philo, char *msg);
+void				print_message(t_philo *philo, char *msg, char *color, int force);
 int					is_dead(t_data *data);
 
 // Cleanup
 void				cleanup_resources(t_data *data);
-
-void				print_message(t_philo *philo, char *msg);
-
 
 #endif

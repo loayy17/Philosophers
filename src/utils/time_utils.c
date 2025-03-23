@@ -10,20 +10,13 @@ long	get_time(void)
 
 void	precise_usleep(long milliseconds, t_data *data)
 {
-	long start;
-	long elapsed;
-	long remaining;
+	long end_time;
 
-	start = get_time();
-	while (1)
+	end_time = get_time() + milliseconds;
+	while (get_time() < end_time)
 	{
 		if (is_dead(data))
 			break ;
-		elapsed = get_time() - start;
-		remaining = milliseconds - elapsed;
-		if (remaining <= 0)
-			break ;
-		if (remaining > 1)
-			usleep(remaining * 1000);
+		usleep(1);
 	}
 }

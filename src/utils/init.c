@@ -1,24 +1,43 @@
 #include "philo.h"
 
+void	free_forks(t_data *data, int n)
+{
+	int	i;
+
+	if (n <= 0)
+		return ;
+	i = -1;
+	while (++i < n)
+		pthread_mutex_destroy(&data->forks[i]);
+	free(data->forks);
+	data->forks = NULL;
+}
+
 void	free_data(t_data *data, int error)
 {
 	int	i;
 
-	i = data->n_philos;
-	while (--i >= 0)
-		pthread_mutex_destroy(&data->forks[data->n_philos]);
-	if (error == PRINT || error == DEATH || error == PHILOS)
-		pthread_mutex_destroy(&data->print_lock);
-	if (error == DEATH || error == PHILOS)
-		pthread_mutex_destroy(&data->death_lock);
-	if (error == PHILOS)
+	if (data->forks)
 	{
+		i = -1;
 		while (++i < data->n_philos)
-			pthread_detach(data->philo[data->n_philos].thread);
+			pthread_mutex_destroy(&data->forks[i]);
+		free(data->forks);
+		data->forks = NULL;
 	}
-	free(data->forks);
-	if (error == PHILOS)
+	if (error >= PRINT)
+	{
+		pthread_mutex_destroy(&data->print_lock);
+		pthread_mutex_destroy(&data->death_lock);
+	}
+	if (error == PHILOS && data->philo)
+	{
+		i = -1;
+		while (++i < data->n_philos)
+			pthread_detach(data->philo[i].thread);
 		free(data->philo);
+		data->philo = NULL;
+	}
 }
 
 void	init_args(t_data *data, int argc, char **argv)
@@ -34,58 +53,74 @@ void	init_args(t_data *data, int argc, char **argv)
 
 int	init_data(t_data *data, int argc, char **argv)
 {
-	int	return_init_mutex;
-	int	return_init_philos;
+	int	ret;
 
+	ret = 0;
 	init_args(data, argc, argv);
-	data->start_time = get_time() ;
+	data->start_time = get_time();
 	data->dead_flag = 0;
 	if (data->n_philos < 1 || data->t_die < 0 || data->t_eat < 0
 		|| data->t_sleep < 0 || (argc == 6 && data->n_must_eat < 1))
 		return (1);
-	return_init_mutex = init_mutexes(data);
-	return_init_philos = init_philosophers(data);
-	if (return_init_mutex || return_init_philos)
-	{
-		free_data(data, FORK);
-		if (return_init_mutex == PRINT)
-			free_data(data, PRINT);
-		else if (return_init_mutex == DEATH)
-			free_data(data, DEATH);
-		else if (return_init_philos == PHILOS)
-			free_data(data, PHILOS);
-		return (1);
-	}
-	return (0);
+	ret = init_mutexes(data);
+	if (ret == 0)
+		ret = init_philosophers(data);
+	if (ret)
+		free_data(data, ret);
+	return (ret != 0);
 }
 
 int	init_mutexes(t_data *data)
 {
 	int	i;
+	int	ret;
 
+	ret = 0;
 	data->forks = malloc(sizeof(pthread_mutex_t) * data->n_philos);
 	if (!data->forks)
-		return (1);
+		return (FORK);
 	i = -1;
-	while (++i < data->n_philos)
+	while (++i < data->n_philos && ret == 0)
 		if (pthread_mutex_init(&data->forks[i], NULL))
-			return (FORK);
-	if (pthread_mutex_init(&data->print_lock, NULL))
-		return (PRINT);
-	if (pthread_mutex_init(&data->death_lock, NULL))
-		return (DEATH);
-	return (0);
+			ret = FORK;
+	if (ret == 0 && pthread_mutex_init(&data->print_lock, NULL))
+		ret = FORK;
+	if (ret == 0 && pthread_mutex_init(&data->death_lock, NULL))
+		ret = DEATH;
+	if (ret != 0)
+	{
+		if (ret == DEATH)
+			free_forks(data, data->n_philos);
+		else
+			free_forks(data, i);
+		if (ret == DEATH)
+			pthread_mutex_destroy(&data->print_lock);
+	}
+	return (ret);
+}
+
+void	free_philos(t_data *data)
+{
+	int	i;
+
+	i = data->n_philos;
+	while (--i >= 0)
+		pthread_detach(data->philo[i].thread);
+	free(data->philo);
+	data->philo = NULL;
 }
 
 int	init_philosophers(t_data *data)
 {
 	int	i;
+	int	ret;
 
+	ret = 0;
 	data->philo = malloc(sizeof(t_philo) * data->n_philos);
 	if (!data->philo)
-		return (1);
+		return (PHILOS);
 	i = -1;
-	while (++i < data->n_philos)
+	while (++i < data->n_philos && ret == 0)
 	{
 		data->philo[i].id = i + 1;
 		data->philo[i].last_meal = data->start_time;
@@ -95,7 +130,11 @@ int	init_philosophers(t_data *data)
 		data->philo[i].right_fork = &data->forks[(i + 1) % data->n_philos];
 		if (pthread_create(&data->philo[i].thread, NULL, philo_routine,
 				&data->philo[i]))
-			return (PHILOS);
+			ret = PHILOS;
 	}
-	return (0);
+	if (ret != 0)
+	{
+		free_philos(data);
+	}
+	return (ret);
 }
