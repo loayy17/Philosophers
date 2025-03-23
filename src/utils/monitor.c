@@ -3,19 +3,18 @@
 static int	check_philosopher(t_data *data, int i)
 {
 	long	current_time;
-	int		dead;
 
-	dead = 0;
 	pthread_mutex_lock(&data->death_lock);
 	current_time = get_time();
 	if ((current_time - data->philo[i].last_meal) > data->t_die)
 	{
 		print_message(&data->philo[i], "died", "red", 1);
 		data->dead_flag = 1;
-		dead = 1;
+		pthread_mutex_unlock(&data->death_lock);
+		return (1);
 	}
 	pthread_mutex_unlock(&data->death_lock);
-	return (dead);
+	return (0);
 }
 
 static int	check_meals(t_data *data)
