@@ -6,11 +6,11 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 23:13:54 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/03/25 22:20:18 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/03/29 20:55:34 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo.h"
+#include "philo_bonus.h"
 
 int	ft_strcmp(const char *s1, const char *s2)
 {
@@ -27,34 +27,37 @@ void	print_message(t_philo *philo, char *msg, char *color, int force)
 	long	timestamp;
 
 	data = philo->data;
+
 	if (!force)
 	{
-		pthread_mutex_lock(&data->death_lock);
+		sem_wait(data->death_lock);
 		if (data->dead_flag)
 		{
-			pthread_mutex_unlock(&data->death_lock);
+			sem_post(data->death_lock);
 			return ;
 		}
-		pthread_mutex_unlock(&data->death_lock);
+		sem_post(data->death_lock);
 	}
 	timestamp = get_time() - data->start_time;
 	if (force)
 	{
-		pthread_mutex_lock(&data->print_lock);
-		printf("| \033[0;31m%-6ld | %d | %s             | 💀\033[0m | \n", timestamp, philo->id, msg);
-		pthread_mutex_unlock(&data->print_lock);
+
+		sem_wait(data->print_lock);
+		printf("| \033[0;31m%-6ld | %d | %s             | 💀\033[0m | \n",
+			timestamp, philo->id, msg);
+		sem_post(data->print_lock);
 	}
 	else
 	{
-		pthread_mutex_lock(&data->death_lock);
-		pthread_mutex_lock(&data->print_lock);
+		sem_wait(data->death_lock);
+		sem_wait(data->print_lock);
 		if (data->dead_flag)
 		{
-			pthread_mutex_unlock(&data->print_lock);
-			pthread_mutex_unlock(&data->death_lock);
+			sem_post(data->print_lock);
+			sem_post(data->death_lock);
 			return ;
 		}
-		pthread_mutex_unlock(&data->death_lock);
+		sem_post(data->death_lock);
 		if (ft_strcmp(color, "yellow") == 0)
 			printf("| \033[0;33m%-6ld | %d | %s      | 🛌 \033[0m| \n",
 				timestamp, philo->id, msg);
@@ -69,7 +72,7 @@ void	print_message(t_philo *philo, char *msg, char *color, int force)
 				timestamp, philo->id, msg);
 		else
 			printf("%-6ld %d %s\n", timestamp, philo->id, msg);
-		printf("--------------------------------------\n");	
-		pthread_mutex_unlock(&data->print_lock);
+		printf("--------------------------------------\n");
+		sem_post(data->print_lock);
 	}
 }
