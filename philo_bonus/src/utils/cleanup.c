@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/05 09:03:12 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/05 09:32:40 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/05 14:23:50 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,6 @@ void	free_philos(t_data *data)
 	if (data->philos)
 	{
 		free(data->philos);
-		data->philos = NULL;
 	}
 }
 

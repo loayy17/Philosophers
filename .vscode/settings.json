@@ -4,6 +4,14 @@
         "__threading_support": "c",
         "pthread.h": "c",
         "__locale": "c",
-        "philo_bonus.h": "c"
+        "philo_bonus.h": "c",
+        "atomic": "c",
+        "condition_variable": "c",
+        "mutex": "c",
+        "__mutex_base": "c",
+        "semaphore": "c",
+        "fcntl.h": "c",
+        "types.h": "c",
+        "time.h": "c"
     }
 }

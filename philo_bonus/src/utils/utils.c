@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/05 09:37:52 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/05 09:38:00 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/05 14:44:03 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,8 @@ void	print_status(t_philo *philo, char *msg, int color, char *emoji)
 
 	data = philo->data;
 	timestamp = get_time() - data->start_time;
+	if (data->dead)
+		return ;
 	sem_wait(data->print);
 	printf("| \033[0;%dm%-6ld | %d | %-16s | %s \033[0m|\n", color, timestamp,
 		philo->id, msg, emoji);

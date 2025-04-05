@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/05 09:37:37 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/05 09:37:39 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/05 15:07:00 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,10 @@ int	eat(t_philo *philo)
 
 	data = philo->data;
 	sem_wait(philo->data->meals);
-	philo->last_meal = get_time();
 	print_status(philo, "has taken a fork", 34, "🍴");
 	print_status(philo, "has taken a fork", 34, "🍴");
 	print_status(philo, "is eating", 32, "🍝");
+	philo->last_meal = get_time();
 	sem_post(philo->data->meals);
 	if (data->dead)
 		return (1);
@@ -33,13 +33,15 @@ void	*is_dead(void *arg)
 {
 	t_philo	*philo;
 	t_data	*data;
+	long	current_time;
 
 	philo = (t_philo *)arg;
 	data = philo->data;
 	while (1)
 	{
 		sem_wait(data->meals);
-		if (get_time() - philo->last_meal > philo->data->t_die)
+		current_time = get_time();
+		if (current_time - philo->last_meal > philo->data->t_die)
 		{
 			print_status(philo, "died", 31, "💀");
 			data->dead = 1;
@@ -68,10 +70,10 @@ void	philo_life(t_philo *philo)
 		free_close(data);
 		exit(0);
 	}
-	pthread_create(&philo->dead, NULL, is_dead, philo);
 	philo->last_meal = get_time();
+	pthread_create(&philo->dead, NULL, is_dead, philo);
 	if (philo->id % 2)
-		usleep(100);
+		usleep(1500);
 	while (!(data->dead))
 	{
 		grap_forks(data);
