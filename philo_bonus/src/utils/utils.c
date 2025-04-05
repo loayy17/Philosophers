@@ -5,46 +5,52 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/27 08:03:56 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/02 15:37:18 by lalhindi         ###   ########.fr       */
+/*   Created: 2025/04/05 09:37:52 by lalhindi          #+#    #+#             */
+/*   Updated: 2025/04/05 09:38:00 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_bonus.h"
 
-int	ft_atoi(const char *str)
+void	grap_forks(t_data *data)
 {
-	int	res;
-	int	sign;
-
-	res = 0;
-	sign = 1;
-	while (*str == ' ' || (*str >= '\t' && *str <= '\r'))
-		str++;
-	if (*str == '-' || *str == '+')
-	{
-		if (*str == '-')
-			sign = -1;
-		str++;
-	}
-	while (*str >= '0' && *str <= '9')
-	{
-		res = res * 10 + (*str - '0');
-		str++;
-	}
-	return (res * sign);
+	sem_wait(data->forks);
+	sem_wait(data->forks);
 }
 
-int	ft_isdigit(int c)
+void	throw_forks(t_philo *philo)
 {
-	return (c >= '0' && c <= '9');
+	sem_post(philo->data->forks);
+	sem_post(philo->data->forks);
 }
-int	is_dead(t_data *data)
-{
-	int ret;
 
-	sem_wait(data->death_lock);
-	ret = data->dead_flag;
-	sem_post(data->death_lock);
-	return (ret);
+long	get_time(void)
+{
+	struct timeval	tv;
+
+	gettimeofday(&tv, NULL);
+	return (tv.tv_sec * 1000 + tv.tv_usec / 1000);
+}
+
+void	precise_sleep(long ms)
+{
+	long	start;
+
+	start = get_time();
+	while (get_time() - start < ms)
+		usleep(100);
+}
+
+void	print_status(t_philo *philo, char *msg, int color, char *emoji)
+{
+	t_data	*data;
+	long	timestamp;
+
+	data = philo->data;
+	timestamp = get_time() - data->start_time;
+	sem_wait(data->print);
+	printf("| \033[0;%dm%-6ld | %d | %-16s | %s \033[0m|\n", color, timestamp,
+		philo->id, msg, emoji);
+	printf("--------------------------------------\n");
+	sem_post(data->print);
 }

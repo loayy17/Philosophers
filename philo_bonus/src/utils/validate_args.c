@@ -1,16 +1,44 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   check_args.c                                       :+:      :+:    :+:   */
+/*   validate_args.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/27 08:02:56 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/02 15:36:08 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/05 09:32:54 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_bonus.h"
+
+int	ft_atoi(const char *str)
+{
+	int	res;
+	int	sign;
+
+	res = 0;
+	sign = 1;
+	while (*str == ' ' || (*str >= '\t' && *str <= '\r'))
+		str++;
+	if (*str == '-' || *str == '+')
+	{
+		if (*str == '-')
+			sign = -1;
+		str++;
+	}
+	while (*str >= '0' && *str <= '9')
+	{
+		res = res * 10 + (*str - '0');
+		str++;
+	}
+	return (res * sign);
+}
+
+int	ft_isdigit(int c)
+{
+	return (c >= '0' && c <= '9');
+}
 
 static int	check_numeric(char *str)
 {
@@ -46,6 +74,17 @@ int	validate_args(int argc, char **argv)
 			return (1);
 		}
 		i++;
+	}
+	return (0);
+}
+
+int	check_args(t_data *data, int *ret)
+{
+	if (data->n_philos < 1 || data->t_die < 0 || data->t_eat < 0
+		|| data->t_sleep < 0 || (data->must_eat != -1 && data->must_eat < 1))
+	{
+		*ret = 1;
+		return (1);
 	}
 	return (0);
 }

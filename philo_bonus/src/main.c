@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/27 08:04:03 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/03 18:16:26 by lalhindi         ###   ########.fr       */
+/*   Created: 2025/04/05 09:32:16 by lalhindi          #+#    #+#             */
+/*   Updated: 2025/04/05 09:32:28 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,17 +15,22 @@
 int	main(int argc, char **argv)
 {
 	t_data	data;
-	int		i;
+	int		return_code;
 
-	memset(&data, 0, sizeof(t_data));
+	return_code = 0;
 	if (validate_args(argc, argv))
 		return (1);
-	if (init_data(&data, argc, argv))
+	return_code = init_data(&data, argc, argv);
+	if (return_code)
+	{
+		error_message(return_code);
 		return (1);
-	start_monitor(&data);
-	i = -1;
-	while (++i < data.n_philos)
-		waitpid(data.philo[i].pid, NULL, 0);
-	cleanup_resources(&data);
+	}
+	if (start_simulation(&data, &return_code))
+	{
+		error_message(return_code);
+		return (1);
+	}
+	cleanup(&data);
 	return (0);
 }
