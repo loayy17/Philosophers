@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/05 09:03:12 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/05 14:23:50 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/09 22:55:55 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,9 +32,9 @@ void	error_message(int error_code)
 
 void	free_philos(t_data *data)
 {
-	if (data->philos)
+	if (data->pids)
 	{
-		free(data->philos);
+		free(data->pids);
 	}
 }
 
@@ -48,17 +48,6 @@ void	kill_philosophers(t_data *data)
 		if (data->philos[i].pid != 0)
 			kill(data->philos[i].pid, SIGKILL);
 	}
-}
-
-void	free_close(t_data *data)
-{
-	sem_close(data->forks);
-	sem_close(data->print);
-	sem_close(data->meals);
-	sem_unlink(SEM_FORKS);
-	sem_unlink(SEM_PRINT);
-	sem_unlink(SEM_MEALS);
-	free_philos(data);
 }
 
 void	cleanup(t_data *data)

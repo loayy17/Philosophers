@@ -1,117 +1,183 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   start_processes.c                                  :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/05 09:37:37 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/05 15:07:00 by lalhindi         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "philo_bonus.h"
 
-int	eat(t_philo *philo)
+void	grab_forks(t_data *data, int id)
 {
-	t_data	*data;
-
-	data = philo->data;
-	sem_wait(philo->data->meals);
-	print_status(philo, "has taken a fork", 34, "🍴");
-	print_status(philo, "has taken a fork", 34, "🍴");
-	print_status(philo, "is eating", 32, "🍝");
-	philo->last_meal = get_time();
-	sem_post(philo->data->meals);
-	if (data->dead)
-		return (1);
-	precise_sleep(philo->data->t_eat);
-	return (0);
+	sem_wait(data->forks);
+	sem_wait(data->fork_mutex);
+	print_action(data, id, "has taken a fork");
+	sem_wait(data->forks);
+	print_action(data, id, "has taken a fork");
+	sem_post(data->fork_mutex);
 }
 
-void	*is_dead(void *arg)
+void	throw_forks(t_data *data, t_philo *philo)
 {
-	t_philo	*philo;
-	t_data	*data;
-	long	current_time;
+	sem_post(data->forks);
+	sem_post(data->forks);
+	sem_wait(philo->meal);
+	philo->last_meal = get_time(data->start_time);
+	sem_post(philo->meal);
+}
 
-	philo = (t_philo *)arg;
-	data = philo->data;
+void	print_action(t_data *data, int id, char *msg)
+{
+	sem_wait(data->print);
+	printf("%ld %d %s\n", get_time(data->start_time), id, msg);
+	sem_post(data->print);
+}
+
+void	eat(t_data *data, int id)
+{
+	sem_wait(data->forks);
+	print_action(data, id, "has taken a fork");
+	sem_wait(data->forks);
+	print_action(data, id, "has taken a fork");
+	print_action(data, id, "is eating");
+	precise_sleep(data->t_eat);
+	sem_post(data->forks);
+	sem_post(data->forks);
+}
+
+void	*monitor(void *arg)
+{
+	t_data	*data;
+	int		id;
+
+	data = (t_data *)arg;
+	id = data->max_meals;
 	while (1)
 	{
-		sem_wait(data->meals);
-		current_time = get_time();
-		if (current_time - philo->last_meal > philo->data->t_die)
+		sem_wait(data->death_sem);
+		if (get_time(data->start_time) > data->t_die)
 		{
-			print_status(philo, "died", 31, "💀");
-			data->dead = 1;
-			sem_wait(data->print);
-			free_philos(data);
+			print_action(data, id, "died");
 			exit(1);
 		}
-		sem_post(data->meals);
-		if (philo->data->must_eat > 0 && philo->meals >= philo->data->must_eat)
-			break ;
+		sem_post(data->death_sem);
 		usleep(1000);
 	}
 	return (NULL);
 }
 
-void	philo_life(t_philo *philo)
+void	*monitor_thread(void *arg)
+{
+	t_monitor_philo	*m;
+	long			now;
+
+	m = (t_monitor_philo *)arg;
+	while (1)
+	{
+		now = get_time(*m->start_time);
+		if (now - *m->last_meal > m->t_die)
+		{
+			sem_wait(m->print);
+			printf("%ld %d died\n", now, m->id);
+			sem_post(m->death);
+			sem_post(m->meal);
+			free(m);
+			return (NULL);
+		}
+		sem_post(m->meal);
+		usleep(1000);
+	}
+	return (NULL);
+}
+void	monitor_philo(t_philo *philo, t_data *data)
+{
+	t_monitor_philo	*m;
+	pthread_t		monitor_philo;
+
+	m = malloc(sizeof(t_monitor_philo));
+	if (!m)
+		return ;
+	m->id = philo->id;
+	m->t_die = data->t_die;
+	m->start_time = &data->start_time;
+	m->last_meal = &philo->last_meal;
+	m->meal = philo->meal;
+	m->death = data->death_sem;
+	m->print = data->print;
+	pthread_create(&monitor_philo, NULL, monitor_thread, m);
+	pthread_detach(monitor_philo);
+}
+void	philo_routine(t_data *data, int id)
+{
+	t_philo	*philo;
+
+	philo = init_philo(id);
+	if (!philo)
+		exit(1);
+	monitor_philo(philo, data);
+	while (1)
+	{
+		print_action(data, id, "is thinking");
+		grab_forks(data, id);
+		print_action(data, id, "is eating");
+		precise_sleep(data->t_eat);
+		++philo->meals_eaten;
+		throw_forks(data, philo);
+		print_action(data, id, "is thinking");
+		if (data->max_meals != -1 && philo->meals_eaten == data->max_meals)
+			sem_post(data->meals);
+		print_action(data, id, "is sleeping");
+		precise_sleep(data->t_sleep);
+	}
+}
+
+void	*death_monitor(void *arg)
 {
 	t_data	*data;
 
-	data = philo->data;
-	if (data->n_philos == 1)
-	{
-		print_status(philo, "has taken a fork", 34, "🍴");
-		usleep(data->t_die * 1000);
-		print_status(philo, "died", 31, "💀");
-		free_close(data);
-		exit(0);
-	}
-	philo->last_meal = get_time();
-	pthread_create(&philo->dead, NULL, is_dead, philo);
-	if (philo->id % 2)
-		usleep(1500);
-	while (!(data->dead))
-	{
-		grap_forks(data);
-		if (eat(philo))
-			break ;
-		philo->meals++;
-		throw_forks(philo);
-		if (data->must_eat > 0 && philo->meals >= data->must_eat)
-			break ;
-		print_status(philo, "is sleeping", 33, "🛌");
-		precise_sleep(philo->data->t_sleep);
-		print_status(philo, "is thinking", 35, "🤔");
-	}
-	pthread_join(philo->dead, NULL);
-	free_close(data);
-	if (data->dead)
-		exit(1);
-	exit(0);
+	data = arg;
+	sem_wait(data->death_sem);
+	for (int i = 0; i < data->n_philos; i++)
+		sem_post(data->meals);
+	return (NULL);
 }
 
-int	start_simulation(t_data *data, int *ret)
+void	*meal_monitor(void *arg)
 {
-	int		i;
-	t_philo	*philos;
+	t_data	*data;
+
+	data = arg;
+	for (int i = 0; i < data->n_philos; i++)
+		sem_wait(data->meals);
+	sem_post(data->death_sem);
+	return (NULL);
+}
+
+void	cleanup(t_data *data)
+{
+	free(data->pids);
+	sem_close(data->forks);
+	sem_close(data->death_sem);
+	sem_close(data->meals);
+	sem_close(data->fork_mutex);
+	sem_close(data->print);
+	free(data);
+}
+void	start_processes(t_data *data)
+{
+	int i;
+	pthread_t t1;
+	pthread_t t2;
 
 	i = -1;
-	philos = data->philos;
-	data->start_time = get_time();
 	while (++i < data->n_philos)
 	{
-		philos[i].pid = fork();
-		if (philos[i].pid == 0)
-			philo_life(&philos[i]);
-		else if (philos[i].pid < 0)
+		data->pids[i] = fork();
+		if (data->pids[i] == 0)
 		{
-			*ret = 4;
-			return (1);
+			philo_routine(data, i + 1);
+			exit(0);
 		}
 	}
-	return (0);
+	pthread_create(&t1, NULL, death_monitor, data);
+	pthread_create(&t2, NULL, meal_monitor, data);
+	pthread_join(t1, NULL);
+	pthread_join(t2, NULL);
+	for (int i = 0; i < data->n_philos; i++)
+		kill(data->pids[i], 9);
+	cleanup(data);
+	exit(0);
 }

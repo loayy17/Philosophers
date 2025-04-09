@@ -1,58 +1,24 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   utils.c                                            :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/05 09:37:52 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/05 14:44:03 by lalhindi         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "philo_bonus.h"
 
-void	grap_forks(t_data *data)
-{
-	sem_wait(data->forks);
-	sem_wait(data->forks);
-}
 
-void	throw_forks(t_philo *philo)
-{
-	sem_post(philo->data->forks);
-	sem_post(philo->data->forks);
-}
-
-long	get_time(void)
+long	get_time(long from)
 {
 	struct timeval	tv;
 
 	gettimeofday(&tv, NULL);
-	return (tv.tv_sec * 1000 + tv.tv_usec / 1000);
+	return ((tv.tv_sec * 1000 + tv.tv_usec / 1000) - from);
 }
 
-void	precise_sleep(long ms)
+void	precise_sleep(long time)
 {
-	long	start;
+	long	start_time;
 
-	start = get_time();
-	while (get_time() - start < ms)
-		usleep(100);
+	start_time = get_time(0);
+	while (get_time(start_time) < time)
+		usleep(1);
 }
-
-void	print_status(t_philo *philo, char *msg, int color, char *emoji)
+int	print_stderr(char *msg, int code)
 {
-	t_data	*data;
-	long	timestamp;
-
-	data = philo->data;
-	timestamp = get_time() - data->start_time;
-	if (data->dead)
-		return ;
-	sem_wait(data->print);
-	printf("| \033[0;%dm%-6ld | %d | %-16s | %s \033[0m|\n", color, timestamp,
-		philo->id, msg, emoji);
-	printf("--------------------------------------\n");
-	sem_post(data->print);
+	printf("Error: %s\n", msg);
+	return (code);
 }

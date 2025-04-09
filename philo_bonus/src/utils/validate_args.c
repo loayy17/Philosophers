@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/27 08:02:56 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/05 09:32:54 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/09 22:29:14 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,13 +78,10 @@ int	validate_args(int argc, char **argv)
 	return (0);
 }
 
-int	check_args(t_data *data, int *ret)
+int	check_args(t_data *data)
 {
 	if (data->n_philos < 1 || data->t_die < 0 || data->t_eat < 0
-		|| data->t_sleep < 0 || (data->must_eat != -1 && data->must_eat < 1))
-	{
-		*ret = 1;
+		|| data->t_sleep < 0 || (data->max_meals != -1 && data->max_meals < 1))
 		return (1);
-	}
 	return (0);
 }
