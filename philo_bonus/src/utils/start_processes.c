@@ -146,16 +146,6 @@ void	*meal_monitor(void *arg)
 	return (NULL);
 }
 
-void	cleanup(t_data *data)
-{
-	free(data->pids);
-	sem_close(data->forks);
-	sem_close(data->death_sem);
-	sem_close(data->meals);
-	sem_close(data->fork_mutex);
-	sem_close(data->print);
-	free(data);
-}
 void	start_processes(t_data *data)
 {
 	int i;
