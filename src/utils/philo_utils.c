@@ -1,17 +1,43 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo_utils.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/11 22:40:32 by lalhindi          #+#    #+#             */
+/*   Updated: 2025/04/11 22:43:59 by lalhindi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo.h"
 
-
-void	update_last_meal(t_philo *philo)
+int	is_dead(t_data *data)
 {
-	pthread_mutex_lock(&philo->data->death_lock);
-	philo->last_meal = get_time();
-	pthread_mutex_unlock(&philo->data->death_lock);
+	int	ret;
+
+	pthread_mutex_lock(&data->death_lock);
+	ret = data->dead_flag;
+	pthread_mutex_unlock(&data->death_lock);
+	return (ret);
+}
+
+int	dead_lock_checker(t_data *data)
+{
+	pthread_mutex_lock(&data->death_lock);
+	if (data->dead_flag)
+	{
+		pthread_mutex_unlock(&data->death_lock);
+		return (1);
+	}
+	pthread_mutex_unlock(&data->death_lock);
+	return (0);
 }
 
 int	all_meals_completed(t_data *data)
 {
-	int i;
-	int all_ate;
+	int	i;
+	int	all_ate;
 
 	if (data->n_must_eat == -1)
 		return (0);

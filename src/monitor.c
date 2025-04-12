@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   monitor.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/11 22:44:23 by lalhindi          #+#    #+#             */
+/*   Updated: 2025/04/11 22:44:24 by lalhindi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo.h"
 
 static int	check_philosopher(t_data *data, int i)
@@ -60,7 +72,6 @@ static void	monitor_loop(t_data *data)
 		}
 		if (!stop && check_meals(data))
 			stop = 1;
-		usleep(100);
 	}
 }
 

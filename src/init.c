@@ -1,44 +1,16 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   init.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/11 22:44:34 by lalhindi          #+#    #+#             */
+/*   Updated: 2025/04/11 22:45:17 by lalhindi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo.h"
-
-void	free_forks(t_data *data, int n)
-{
-	int	i;
-
-	if (n <= 0)
-		return ;
-	i = -1;
-	while (++i < n)
-		pthread_mutex_destroy(&data->forks[i]);
-	free(data->forks);
-	data->forks = NULL;
-}
-
-void	free_data(t_data *data, int error)
-{
-	int	i;
-
-	if (data->forks)
-	{
-		i = -1;
-		while (++i < data->n_philos)
-			pthread_mutex_destroy(&data->forks[i]);
-		free(data->forks);
-		data->forks = NULL;
-	}
-	if (error >= PRINT)
-	{
-		pthread_mutex_destroy(&data->print_lock);
-		pthread_mutex_destroy(&data->death_lock);
-	}
-	if (error == PHILOS && data->philo)
-	{
-		i = -1;
-		while (++i < data->n_philos)
-			pthread_detach(data->philo[i].thread);
-		free(data->philo);
-		data->philo = NULL;
-	}
-}
 
 void	init_args(t_data *data, int argc, char **argv)
 {
@@ -97,17 +69,6 @@ int	init_mutexes(t_data *data)
 			pthread_mutex_destroy(&data->print_lock);
 	}
 	return (ret);
-}
-
-void	free_philos(t_data *data)
-{
-	int	i;
-
-	i = data->n_philos;
-	while (--i >= 0)
-		pthread_detach(data->philo[i].thread);
-	free(data->philo);
-	data->philo = NULL;
 }
 
 int	init_philosophers(t_data *data)

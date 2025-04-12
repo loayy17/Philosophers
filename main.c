@@ -1,34 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   time_utils.c                                       :+:      :+:    :+:   */
+/*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/11 22:26:37 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/11 22:26:38 by lalhindi         ###   ########.fr       */
+/*   Created: 2025/04/11 22:46:55 by lalhindi          #+#    #+#             */
+/*   Updated: 2025/04/11 22:47:02 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-long	get_time(void)
+int	main(int argc, char **argv)
 {
-	struct timeval	tv;
+	t_data	data;
 
-	gettimeofday(&tv, NULL);
-	return (tv.tv_sec * 1000 + tv.tv_usec / 1000);
-}
-
-void	precise_usleep(long milliseconds, t_data *data)
-{
-	long	end_time;
-
-	end_time = get_time() + milliseconds;
-	while (get_time() < end_time)
-	{
-		if (is_dead(data))
-			break ;
-		usleep(1);
-	}
+	if (validate_args(argc, argv))
+		return (1);
+	if (init_data(&data, argc, argv))
+		return (1);
+	start_monitor(&data);
+	cleanup_resources(&data);
+	return (0);
 }

@@ -2,11 +2,14 @@
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   validate_args.c                                    :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/03/27 08:02:56 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/11 14:15:41 by lalhindi         ###   ########.fr       */
+/*                                                    +:+ +:+
+	+:+     */
+/*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+
+	+#+        */
+/*                                                +#+#+#+#+#+
+	+#+           */
+/*   Created: 2025/04/12 19:29:23 by lalhindi          #+#    #+#             */
+/*   Updated: 2025/04/12 19:29:23 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +17,8 @@
 
 int	ft_atoi(const char *str)
 {
-	int	res;
-	int	sign;
+	long	res;
+	int		sign;
 
 	res = 0;
 	sign = 1;
@@ -32,6 +35,8 @@ int	ft_atoi(const char *str)
 		res = res * 10 + (*str - '0');
 		str++;
 	}
+	if (res > 2147483647)
+		return (-2);
 	return (res * sign);
 }
 
@@ -65,23 +70,26 @@ int	validate_args(int argc, char **argv)
 		printf("Error: Wrong number of arguments\n");
 		return (1);
 	}
-	i = 1;
-	while (i < argc)
+	i = 0;
+	while (++i < argc)
 	{
 		if (!check_numeric(argv[i]))
 		{
 			printf("Error: Non-numeric argument: %s\n", argv[i]);
 			return (1);
 		}
-		i++;
 	}
 	return (0);
 }
 
 int	check_args(t_data *data)
 {
-	if (data->n_philos < 1 || data->t_die < 0 || data->t_eat < 0
-		|| data->t_sleep < 0 || (data->max_meals != -1 && data->max_meals < 1))
+	if (data->nb_philo < 1 || data->time_to_die < 0 || data->time_to_eat < 0
+		|| data->time_to_sleep < 0 || (data->max_meals != -1
+			&& data->max_meals < 1))
+	{
+		printf("Error: Invalid arguments\n");
 		return (1);
+	}
 	return (0);
 }

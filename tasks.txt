@@ -1,4 +1,0 @@
-1 - validation ars philo
-2 - initial data and fork and philo
-3 - routine 
-4 - monitor

@@ -64,10 +64,15 @@ void				*philo_routine(void *arg);
 // Utils
 int					ft_atoi(const char *str);
 int					ft_isdigit(int c);
-void				print_message(t_philo *philo, char *msg, char *color, int force);
+void				print_message(t_philo *philo, char *msg, char *color,
+						int force);
 int					is_dead(t_data *data);
 
 // Cleanup
 void				cleanup_resources(t_data *data);
-
+void				free_data(t_data *data, int error);
+void				free_forks(t_data *data, int n);
+void				free_philos(t_data *data);
+int					dead_lock_checker(t_data *data);
+int					ft_strcmp(const char *s1, const char *s2);
 #endif

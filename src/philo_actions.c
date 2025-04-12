@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo_actions.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/04/11 22:44:09 by lalhindi          #+#    #+#             */
+/*   Updated: 2025/04/11 22:44:13 by lalhindi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo.h"
 
 static void	eat(t_philo *philo)
@@ -5,15 +17,10 @@ static void	eat(t_philo *philo)
 	t_data	*data;
 
 	data = philo->data;
-	pthread_mutex_lock(&data->death_lock);
-	if (data->dead_flag)
-	{
-		pthread_mutex_unlock(&data->death_lock);
+	if (dead_lock_checker(data))
 		return ;
-	}
 	philo->last_meal = get_time();
 	philo->meals_eaten++;
-	pthread_mutex_unlock(&data->death_lock);
 	print_message(philo, "has taken a fork", "blue", 0);
 	print_message(philo, "has taken a fork", "blue", 0);
 	print_message(philo, "is eating", "green", 0);
@@ -47,7 +54,7 @@ static int	grab_forks(t_philo *philo)
 
 void	*philo_routine(void *arg)
 {
-	t_philo *philo;
+	t_philo	*philo;
 
 	philo = (t_philo *)arg;
 	if (philo->data->n_philos == 1)

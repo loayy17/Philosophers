@@ -2,23 +2,27 @@ CC = cc
 CFLAGS = -Wall -Wextra -Werror ${INCLUDE}
 NAME = philo_bonus
 SRC = 	src/main.c \
-		src/utils/cleanup.c \
+		src/cleanup.c \
+		src/monitor.c \
+		src/philo_routine.c \
 		src/utils/init.c \
-		src/utils/philo_actions.c \
-		src/utils/start_processes.c \
 		src/utils/utils.c \
 		src/utils/validate_args.c 
 
 INCLUDE = -I./include
-OBJ = ${SRC:.c=.o}
+OBJ = $(addprefix $(OBJ_DIR)/, $(SRC:.c=.o))
 
 ${NAME}: ${OBJ}
 	${CC} ${CFLAGS} -o ${NAME} ${OBJ} -lpthread
 
+$(OBJ_DIR)/%.o: %.c
+	@mkdir -p $(dir $@)
+	${CC} ${CFLAGS} -c $< -o $@
+
 all: ${NAME}
 
 clean:
-	rm -f ${OBJ}
+	rm -rf ${OBJ_DIR}
 
 fclean: clean
 	rm -f ${NAME}
