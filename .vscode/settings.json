@@ -12,6 +12,8 @@
         "semaphore": "c",
         "fcntl.h": "c",
         "types.h": "c",
-        "time.h": "c"
+        "time.h": "c",
+        "thread": "c",
+        "locale": "c"
     }
 }

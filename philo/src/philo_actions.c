@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/11 22:44:09 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/11 22:44:13 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/13 21:54:21 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,13 +17,13 @@ static void	eat(t_philo *philo)
 	t_data	*data;
 
 	data = philo->data;
+	philo->last_meal = get_time();
+	print_message(philo, FORKS, 0);
+	print_message(philo, FORKS, 0);
+	print_message(philo, EAT, 0);
 	if (dead_lock_checker(data))
 		return ;
-	philo->last_meal = get_time();
 	philo->meals_eaten++;
-	print_message(philo, "has taken a fork", "blue", 0);
-	print_message(philo, "has taken a fork", "blue", 0);
-	print_message(philo, "is eating", "green", 0);
 	precise_usleep(data->t_eat, data);
 }
 
@@ -60,7 +60,7 @@ void	*philo_routine(void *arg)
 	if (philo->data->n_philos == 1)
 	{
 		pthread_mutex_lock(philo->left_fork);
-		print_message(philo, "has taken a fork", "blue", 0);
+		print_message(philo, FORKS, 0);
 		pthread_mutex_unlock(philo->left_fork);
 		if (is_dead(philo->data))
 			precise_usleep(philo->data->t_die, philo->data);
@@ -72,9 +72,9 @@ void	*philo_routine(void *arg)
 			break ;
 		eat(philo);
 		drop_forks(philo->left_fork, philo->right_fork);
-		print_message(philo, "is sleeping", "yellow", 0);
+		print_message(philo, SLEEP, 0);
 		precise_usleep(philo->data->t_sleep, philo->data);
-		print_message(philo, "is thinking", "magenta", 0);
+		print_message(philo, THINK, 0);
 	}
 	return (NULL);
 }

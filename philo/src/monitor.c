@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/11 22:44:23 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/11 22:44:24 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/12 21:39:56 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ static int	check_philosopher(t_data *data, int i)
 	current_time = get_time();
 	if ((current_time - data->philo[i].last_meal) > data->t_die)
 	{
-		print_message(&data->philo[i], "died", "red", 1);
+		print_message(&data->philo[i], DEAD, 1);
 		data->dead_flag = 1;
 		pthread_mutex_unlock(&data->death_lock);
 		return (1);
@@ -36,15 +36,15 @@ static int	check_meals(t_data *data)
 
 	if (data->n_must_eat == -1)
 		return (0);
-	all_ate = 1;
 	i = -1;
 	pthread_mutex_lock(&data->death_lock);
 	while (++i < data->n_philos)
 	{
+		all_ate = 1;
 		if (data->philo[i].meals_eaten < data->n_must_eat)
 		{
 			all_ate = 0;
-			break ;
+			break;
 		}
 	}
 	if (all_ate)

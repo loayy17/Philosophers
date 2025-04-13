@@ -7,6 +7,17 @@
 # include <sys/time.h>
 # include <unistd.h>
 
+# define FORKS 1
+# define EAT 2
+# define SLEEP 3
+# define THINK 4
+# define DEAD 5
+# define RED "\033[31m"
+# define GREEN "\033[32m"
+# define YELLOW "\033[33m"
+# define BLUE "\033[34m"
+# define MAGENTA "\033[35m"
+# define RESET "\033[0m"
 typedef struct s_data
 {
 	int				n_philos;
@@ -41,34 +52,19 @@ enum				e_mutex
 	DEATH,
 	PHILOS
 };
-
-// Main
 int					validate_args(int argc, char **argv);
-
-// Init
 int					init_data(t_data *data, int argc, char **argv);
 int					init_mutexes(t_data *data);
 int					init_philosophers(t_data *data);
-
-// Time
 long				get_time(void);
 void				precise_usleep(long milliseconds, t_data *data);
-
-// Monitor
 void				*monitor_routine(void *arg);
 void				start_monitor(t_data *data);
-
-// Actions
 void				*philo_routine(void *arg);
-
-// Utils
 int					ft_atoi(const char *str);
 int					ft_isdigit(int c);
-void				print_message(t_philo *philo, char *msg, char *color,
-						int force);
+void				print_message(t_philo *philo, int type, int force);
 int					is_dead(t_data *data);
-
-// Cleanup
 void				cleanup_resources(t_data *data);
 void				free_data(t_data *data, int error);
 void				free_forks(t_data *data, int n);
