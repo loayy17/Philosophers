@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/14 23:13:54 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/12 21:37:07 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/13 22:04:26 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,6 @@ void	print_colored(int id, int type, t_data *data)
 	else if (type == DEAD)
 		printf(RED "| %-6ld | %d | is dead        | 💀 | \n" RESET, time, id);
 	printf("------------------------------------\n");
-	fflush(stdout);
 	pthread_mutex_unlock(&data->print_lock);
 }
 

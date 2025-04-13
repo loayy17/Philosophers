@@ -50,7 +50,6 @@ void	print_message(int id, int type, long start, sem_t *print)
 	else if (type == DEAD)
 		printf(RED "| %-6ld | %d | is dead        | 💀 | \n" RESET, time, id);
 	printf("------------------------------------\n");
-	fflush(stdout);
 	if (type != DEAD)
 		sem_post(print);
 }
