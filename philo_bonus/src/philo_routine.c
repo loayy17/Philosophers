@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 19:27:08 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/12 19:28:29 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/12 21:04:19 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ int	start_philosopher(int id, t_data *data)
 		print_message(id, THINK, data->start_time, data->print);
 		eat(data, id);
 		update_last_meal(philo, data->start_time);
-		if (philo->meals == data->max_meals)
+		if (philo->meals == data->max_meals && data->max_meals != -1)
 			sem_post(data->meals);
 		print_message(id, SLEEP, data->start_time, data->print);
 		precise_usleep(data->time_to_sleep);
@@ -64,8 +64,8 @@ t_philo	*create_philo(int id)
 void	eat(t_data *data, int id)
 {
 	sem_wait(data->forks);
-	print_message(id, FORK, data->start_time, data->print);
 	sem_wait(data->forks);
+	print_message(id, FORK, data->start_time, data->print);
 	print_message(id, FORK, data->start_time, data->print);
 	print_message(id, EAT, data->start_time, data->print);
 	precise_usleep(data->time_to_eat);

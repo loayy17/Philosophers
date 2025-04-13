@@ -10,19 +10,15 @@ SRC = 	src/main.c \
 		src/utils/validate_args.c 
 
 INCLUDE = -I./include
-OBJ = $(addprefix $(OBJ_DIR)/, $(SRC:.c=.o))
+OBJ = $(SRC:.c=.o)
 
 ${NAME}: ${OBJ}
 	${CC} ${CFLAGS} -o ${NAME} ${OBJ} -lpthread
 
-$(OBJ_DIR)/%.o: %.c
-	@mkdir -p $(dir $@)
-	${CC} ${CFLAGS} -c $< -o $@
-
 all: ${NAME}
 
 clean:
-	rm -rf ${OBJ_DIR}
+	rm -rf ${OBJ}
 
 fclean: clean
 	rm -f ${NAME}
