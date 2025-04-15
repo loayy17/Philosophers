@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/11 22:44:23 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/12 21:39:56 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/13 22:07:51 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ static int	check_meals(t_data *data)
 		if (data->philo[i].meals_eaten < data->n_must_eat)
 		{
 			all_ate = 0;
-			break;
+			break ;
 		}
 	}
 	if (all_ate)
