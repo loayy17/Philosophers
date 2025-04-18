@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/11 22:44:34 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/11 22:45:17 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/16 20:09:42 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,8 @@ int	init_mutexes(t_data *data)
 		ret = FORK;
 	if (ret == 0 && pthread_mutex_init(&data->death_lock, NULL))
 		ret = DEATH;
+	if (pthread_mutex_init(&data->meal_lock, NULL))
+		ret = MEAL;
 	if (ret != 0)
 	{
 		if (ret == DEATH)

@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 19:28:43 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/12 21:04:31 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/18 15:44:46 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,21 +32,47 @@ int	init_args(int argc, char **argv, t_data *data)
 
 int	init_semaphores(t_data *data)
 {
-	sem_unlink("forks");
-	sem_unlink("death");
-	sem_unlink("meals");
-	sem_unlink("print");
-	data->forks = sem_open("forks", O_CREAT, 0644, data->nb_philo);
-	data->death = sem_open("death", O_CREAT, 0644, 0);
-	data->meals = sem_open("meals", O_CREAT, 0644, 0);
-	data->print = sem_open("print", O_CREAT, 0644, 1);
-	if (data->forks == SEM_FAILED || data->death == SEM_FAILED
-		|| data->meals == SEM_FAILED || data->print == SEM_FAILED)
+	sem_unlink("/death");
+	data->death = sem_open("/death", O_CREAT, 0644, 0);
+	if(data->death == SEM_FAILED)
 	{
 		free(data->philo_pid);
 		free(data);
 		return (1);
 	}
+	sem_post(data->death);
+    sem_wait(data->death);
+	sem_unlink("/meals");
+	data->meals = sem_open("/meals", O_CREAT, 0644, 0);
+	if (data->meals == SEM_FAILED)
+	{
+		free(data->philo_pid);
+		free(data);
+		return (1);
+	}
+	sem_post(data->meals);
+	sem_wait(data->meals);
+	sem_unlink("/forks");
+	data->forks = sem_open("/forks", O_CREAT, 0644, data->nb_philo);
+	if (data->forks == SEM_FAILED)
+	{
+		free(data->philo_pid);
+		free(data);
+		return (1);
+	}
+	sem_post(data->forks);
+	sem_wait(data->forks);
+	sem_unlink("/print");
+	data->print = sem_open("/print", O_CREAT, 0644, 1);
+	
+	if (data->print == SEM_FAILED)
+	{
+		free(data->philo_pid);
+		free(data);
+		return (1);
+	}
+	sem_post(data->print);
+	sem_wait(data->print);
 	return (0);
 }
 

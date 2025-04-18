@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 22:08:16 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/13 22:08:16 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/16 20:09:32 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ typedef struct s_data
 	int				n_must_eat;
 	long			start_time;
 	int				dead_flag;
+	pthread_mutex_t	meal_lock;
 	pthread_mutex_t	*forks;
 	pthread_mutex_t	print_lock;
 	pthread_mutex_t	death_lock;
@@ -63,6 +64,7 @@ enum				e_mutex
 	FORK,
 	PRINT,
 	DEATH,
+	MEAL,
 	PHILOS
 };
 int					validate_args(int argc, char **argv);

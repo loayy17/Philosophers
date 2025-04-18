@@ -61,13 +61,13 @@ static int	check_numeric(char *str)
 	return (1);
 }
 
-int	validate_args(int argc, char **argv)
+int validate_args(int argc, char **argv)
 {
 	int	i;
 
 	if (argc < 5 || argc > 6)
 	{
-		printf("Error: Wrong number of arguments\n");
+		ft_print_error("Error: Invalid number of arguments\n");
 		return (1);
 	}
 	i = 0;
@@ -75,7 +75,9 @@ int	validate_args(int argc, char **argv)
 	{
 		if (!check_numeric(argv[i]))
 		{
-			printf("Error: Non-numeric argument: %s\n", argv[i]);
+			ft_print_error("Error: Non-numeric argument: ");
+			ft_print_error(argv[i]);
+			ft_print_error("\n");
 			return (1);
 		}
 	}
@@ -88,7 +90,7 @@ int	check_args(t_data *data)
 		|| data->time_to_sleep < 0 || (data->max_meals != -1
 			&& data->max_meals < 1))
 	{
-		printf("Error: Invalid arguments\n");
+		ft_print_error("Error: Invalid argument\n");
 		return (1);
 	}
 	return (0);

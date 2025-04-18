@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 19:26:15 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/12 19:26:15 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/18 15:08:16 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,9 @@ void	start_process(t_data *data)
 	{
 		data->philo_pid[i] = fork();
 		if (data->philo_pid[i] == 0)
+		{
 			philo_broken = start_philosopher(i + 1, data);
+		}
 		if (philo_broken)
 		{
 			while (i >= 0)
@@ -37,29 +39,33 @@ void	start_process(t_data *data)
 	}
 }
 
+int ft_print_error(char *str)
+{
+	while(*str)
+	{
+		write(2, str, 1);
+		str++;
+	}
+	return (1);
+}
+
 int	main(int argc, char *argv[])
 {
 	pthread_t	monitors[2];
-	t_data		*data;
+	t_data		data;
 
-	data = malloc(sizeof(t_data));
-	if (!data)
-		return (1);
 	if (validate_args(argc, argv))
+		return (ft_print_error("Error: Invalid arguments\n"));
+	if (init_data(argc, argv, &data))
 	{
-		free(data);
+		free_data(&data);
 		return (1);
 	}
-	if (init_data(argc, argv, data))
-	{
-		free_data(data);
-		return (1);
-	}
-	start_process(data);
-	pthread_create(&monitors[0], NULL, &monitor_death, data);
-	pthread_create(&monitors[1], NULL, &monitor_meals, data);
-	pthread_join(monitors[0], NULL);
+	start_process(&data);
+	pthread_create(&monitors[1], NULL, &monitor_meals, &data);
+	pthread_create(&monitors[0], NULL, &monitor_death, &data);
 	pthread_join(monitors[1], NULL);
-	cleanup_simulation(data);
+	pthread_join(monitors[0], NULL);
+	cleanup_simulation(&data);
 	return (0);
 }

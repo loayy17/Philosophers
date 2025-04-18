@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/11 22:44:23 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/13 22:07:51 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/16 20:22:43 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,14 +17,19 @@ static int	check_philosopher(t_data *data, int i)
 	long	current_time;
 
 	pthread_mutex_lock(&data->death_lock);
+	pthread_mutex_lock(&data->meal_lock);
 	current_time = get_time();
+	
 	if ((current_time - data->philo[i].last_meal) > data->t_die)
 	{
+		pthread_mutex_unlock(&data->meal_lock);
 		print_message(&data->philo[i], DEAD, 1);
 		data->dead_flag = 1;
+		
 		pthread_mutex_unlock(&data->death_lock);
 		return (1);
 	}
+	pthread_mutex_unlock(&data->meal_lock);
 	pthread_mutex_unlock(&data->death_lock);
 	return (0);
 }
@@ -41,11 +46,14 @@ static int	check_meals(t_data *data)
 	while (++i < data->n_philos)
 	{
 		all_ate = 1;
+		pthread_mutex_lock(&data->meal_lock);
 		if (data->philo[i].meals_eaten < data->n_must_eat)
 		{
+			pthread_mutex_unlock(&data->meal_lock);
 			all_ate = 0;
 			break ;
 		}
+		pthread_mutex_unlock(&data->meal_lock);
 	}
 	if (all_ate)
 		data->dead_flag = 1;

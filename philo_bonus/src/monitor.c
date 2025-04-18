@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 19:26:39 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/12 21:03:18 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/18 15:49:42 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,15 @@ void	*monitor_routine(void *arg)
 		now = get_time_ms(mon_philo->start_time);
 		sem_wait(mon_philo->last_meal_sem);
 		if (now - *mon_philo->last_meal > mon_philo->time_to_die)
+		{
 			dead = 1;
+		}
 		sem_post(mon_philo->last_meal_sem);
+		usleep(100);
 	}
 	print_message(mon_philo->id, DEAD, mon_philo->start_time, mon_philo->print);
+	sem_close(mon_philo->last_meal_sem);
+	sem_unlink("/last_meal_sem");
 	sem_post(mon_philo->death);
 	free(mon_philo);
 	return (NULL);
@@ -40,10 +45,11 @@ void	*monitor_death(void *arg)
 	int		i;
 
 	data = (t_data *)arg;
-	i = -1;
 	sem_wait(data->death);
-	while (++i < data->nb_philo)
+	for (i = 0; i < data->nb_philo; i++)
+	{
 		sem_post(data->meals);
+	}
 	return (NULL);
 }
 

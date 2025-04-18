@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 22:12:26 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/15 20:49:39 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/18 15:08:50 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,6 @@ typedef struct s_data
 	int		*philo_pid;
 	long	start_time;
 	sem_t	*forks;
-	sem_t	*s7n;
 	sem_t	*death;
 	sem_t	*meals;
 	sem_t	*print;
@@ -85,9 +84,9 @@ t_philo		*create_philo(int id);
 int			check_args(t_data *data);
 void		*monitor_death(void *arg);
 void		*monitor_meals(void *arg);
-void		eat(t_data *data, int id);
+void		eat(t_data *data, int id, t_philo *philo, long start);
 void		update_last_meal(t_philo *philo, long start);
 void		kill_children(t_data *data);
 void		free_data(t_data *data);
-
+int		ft_print_error(char *str);
 #endif

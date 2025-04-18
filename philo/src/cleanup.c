@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/11 22:46:21 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/11 22:46:32 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/16 20:14:36 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,9 @@ void	free_philos(t_data *data)
 
 	i = data->n_philos;
 	while (--i >= 0)
-		pthread_detach(data->philo[i].thread);
+	{
+		pthread_join(data->philo[i].thread, NULL);
+	}
 	free(data->philo);
 	data->philo = NULL;
 }
@@ -57,7 +59,9 @@ void	free_data(t_data *data, int error)
 	{
 		i = -1;
 		while (++i < data->n_philos)
+		{
 			pthread_detach(data->philo[i].thread);
+		}
 		free(data->philo);
 		data->philo = NULL;
 	}
@@ -72,6 +76,7 @@ static void	destroy_mutexes(t_data *data)
 		pthread_mutex_destroy(&data->forks[i]);
 	pthread_mutex_destroy(&data->print_lock);
 	pthread_mutex_destroy(&data->death_lock);
+	pthread_mutex_destroy(&data->meal_lock);
 }
 
 void	cleanup_resources(t_data *data)
