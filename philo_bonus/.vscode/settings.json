@@ -60,6 +60,8 @@
     "philo_bonus.h": "c",
     "time.h": "c",
     "unistd.h": "c",
-    "fcntl.h": "c"
+    "fcntl.h": "c",
+    "stdio.h": "c",
+    "stdlib.h": "c"
   }
 }

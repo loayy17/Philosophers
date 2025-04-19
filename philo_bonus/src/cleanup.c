@@ -6,47 +6,47 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 19:26:05 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/18 15:08:12 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/19 20:40:04 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_bonus.h"
 
-void	free_data(t_data *data)
+void	kill_children(t_data *data, int i)
 {
-	if (data->philo_pid)
-	{
-		free(data->philo_pid);
-		data->philo_pid = NULL;
-	}
-	// if (data)
-	// {
-	// 	free(data);
-	// 	data = NULL;
-	// }
-}
+	int	j;
 
-void	kill_children(t_data *data)
-{
-	int	i;
-
-	i = -1;
-	while (++i < data->nb_philo)
+	j = -1;
+	while (++j < i)
 	{
-		kill(data->philo_pid[i], SIGKILL);
+		kill(data->philos[j].pid, SIGKILL);
 	}
 }
-
+void	clean_child_data(t_philo *philo, t_data *data)
+{
+	if (philo->forks != SEM_FAILED)
+		sem_close(philo->forks);
+	if (philo->n_philo_eat != SEM_FAILED)
+		sem_close(philo->n_philo_eat);
+	if (philo->death != SEM_FAILED)
+		sem_close(philo->death);
+	if (data->philos)
+		free(data->philos);
+}
 void	cleanup_simulation(t_data *data)
 {
-	kill_children(data);
-	sem_close(data->death);
-	sem_close(data->meals);
-	sem_close(data->forks);
-	sem_close(data->print);
+	if (data->forks != SEM_FAILED)
+		sem_close(data->forks);
+	if (data->n_philo_eat != SEM_FAILED)
+		sem_close(data->n_philo_eat);
+	if (data->death != SEM_FAILED)
+		sem_close(data->death);
 	sem_unlink("/forks");
+	sem_unlink("/n_philo_eat");
 	sem_unlink("/death");
-	sem_unlink("/meals");
-	sem_unlink("/print");
-	free_data(data);
+	if (data->philos)
+	{
+		free(data->philos);
+		data->philos = NULL;
+	}
 }

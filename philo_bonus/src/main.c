@@ -6,42 +6,90 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 19:26:15 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/18 15:08:16 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/19 21:16:02 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_bonus.h"
 
-void	start_process(t_data *data)
+void	free_data(t_data *data)
+{
+	if (data->philos)
+		free(data->philos);
+	if (data->forks != SEM_FAILED)
+		sem_close(data->forks);
+	if (data->n_philo_eat != SEM_FAILED)
+		sem_close(data->n_philo_eat);
+	if (data->death != SEM_FAILED)
+		sem_close(data->death);
+}
+
+void	wait_children(t_data *data)
+{
+	int		i;
+	int		status;
+	int		id;
+	long	time;
+	int		meals_completed;
+
+	i = -1;
+	meals_completed = 0;
+	while (++i < data->n_philo)
+	{
+		waitpid(-1, &status, 0);
+		id = (((status)&0xff00) >> 8);
+		if (id == 0)
+		{
+			meals_completed++;
+			if (meals_completed == data->n_philo)
+				break ;
+			
+		}
+		else
+		{
+			time = get_time_ms(data->philos[id - 1].last_meal);
+			printf(RED "| %-6ld | %d | is dead        | 💀 | \n" RESET, time,
+				id);
+			break ;
+		}
+	}
+	kill_children(data, data->n_philo);
+}
+
+int	start_process(t_data *data)
 {
 	int	i;
 	int	philo_broken;
 
 	i = -1;
 	philo_broken = 0;
-	data->start_time = get_time_ms(0);
-	while (++i < data->nb_philo)
+	while (++i < data->n_philo)
 	{
-		data->philo_pid[i] = fork();
-		if (data->philo_pid[i] == 0)
+		data->philos[i].pid = fork();
+		if (data->philos[i].pid < 0)
+		{
+			kill_children(data, i);
+			ft_print_error("Error: Failed to create process\n");
+			return (1);
+		}
+		if (data->philos[i].pid == 0)
 		{
 			philo_broken = start_philosopher(i + 1, data);
 		}
 		if (philo_broken)
 		{
-			while (i >= 0)
-			{
-				kill(data->philo_pid[i], SIGKILL);
-				i--;
-			}
-			break ;
+			kill_children(data, i);
+			ft_print_error("Error: Failed to start philosopher\n");
+			return (1);
 		}
 	}
+	wait_children(data);
+	return (0);
 }
 
-int ft_print_error(char *str)
+int	ft_print_error(char *str)
 {
-	while(*str)
+	while (*str)
 	{
 		write(2, str, 1);
 		str++;
@@ -51,21 +99,20 @@ int ft_print_error(char *str)
 
 int	main(int argc, char *argv[])
 {
-	pthread_t	monitors[2];
-	t_data		data;
+	t_data	data;
 
 	if (validate_args(argc, argv))
-		return (ft_print_error("Error: Invalid arguments\n"));
+		return (1);
 	if (init_data(argc, argv, &data))
 	{
 		free_data(&data);
 		return (1);
 	}
-	start_process(&data);
-	pthread_create(&monitors[1], NULL, &monitor_meals, &data);
-	pthread_create(&monitors[0], NULL, &monitor_death, &data);
-	pthread_join(monitors[1], NULL);
-	pthread_join(monitors[0], NULL);
+	if (start_process(&data))
+	{
+		free_data(&data);
+		return (1);
+	}
 	cleanup_simulation(&data);
 	return (0);
 }

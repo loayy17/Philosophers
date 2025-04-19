@@ -6,78 +6,123 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 19:27:08 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/18 15:08:22 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/19 21:08:13 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_bonus.h"
 
+int	check_dead(t_philo *philo)
+{
+	sem_wait(philo->death);
+	if (get_time_ms(philo->last_meal) > philo->t_to_die)
+	{
+		philo->last_meal = get_time_ms(philo->start_time);
+		sem_post(philo->death);
+		return (1);
+	}
+	sem_post(philo->death);
+	return (0);
+}
+
+void	free_philo(t_philo *philo, t_data *data)
+{
+	(void)data;
+	if (philo->forks != SEM_FAILED)
+		sem_close(philo->forks);
+	if (philo->n_philo_eat != SEM_FAILED)
+		sem_close(philo->n_philo_eat);
+	if (philo->death != SEM_FAILED)
+		sem_close(philo->death);
+	free(data->philos);
+}
+
 int	start_philosopher(int id, t_data *data)
 {
 	t_philo	*philo;
 
-	philo = create_philo(id);
-	if (!philo)
-		return (id);
-	start_monitor_thread(philo, data);
-	if (data->nb_philo == 1)
+	philo = &data->philos[id - 1];
+	philo->pid = getpid();
+	if (data->n_philo == 1)
 	{
-		sem_wait(data->forks);
-		print_message(id, FORK, data->start_time, data->print);
-		precise_usleep(data->time_to_die);
+		if (print_message(FORK, philo))
+			return (philo->id);
+		precise_usleep(data->t_to_die, philo);
 		sem_post(data->forks);
-		return (0);
+		clean_child_data(philo, data);
+		exit(philo->id);
 	}
 	while (1)
 	{
-		eat(data, id, philo, data->start_time);
-		if (philo->meals == data->max_meals && data->max_meals != -1)
-		{
-			sem_close(philo->last_meal_sem);
-			sem_unlink("/last_meal_sem");
-			sem_post(data->meals);
-			
-		}
-		print_message(id, SLEEP, data->start_time, data->print);
-		precise_usleep(data->time_to_sleep);
-		print_message(id, THINK, data->start_time, data->print);
+		if (check_dead(philo))
+			break ;
+		if (eat(philo))
+			break ;
+		if (data->max_meals && sleep_philo(philo))
+			break ;
+		if (data->max_meals && think(philo))
+			break ;
 	}
+	id = philo->id;
+	clean_child_data(philo, data);
+	if (philo->max_meals == 0)
+		exit(0);
+	else
+		exit(id);
+}
+
+int	grap_forks(t_philo *philo)
+{
+	sem_wait(philo->n_philo_eat);
+	sem_wait(philo->forks);
+	if (print_message(FORK, philo))
+		return (-1);
+	if (check_dead(philo))
+		return (-1);
+	sem_wait(philo->forks);
+	if (print_message(FORK, philo))
+		return (-1);
+	if (check_dead(philo))
+		return (-1);
+	return (0);
+}
+int	throw_forks(t_philo *philo)
+{
+	sem_post(philo->forks);
+	sem_post(philo->forks);
+	sem_post(philo->n_philo_eat);
 	return (0);
 }
 
-t_philo	*create_philo(int id)
+int	eat(t_philo *philo)
 {
-	t_philo	*philo;
-
-	philo = malloc(sizeof(t_philo));
-	if (!philo)
-		return (NULL);
-	philo->id = id;
-	philo->meals = 0;
-	philo->last_meal = 0;
-	sem_unlink("/last_meal_sem");
-	philo->last_meal_sem = sem_open("/last_meal_sem", O_CREAT, 0644, 1);
-	if (philo->last_meal_sem == SEM_FAILED)
-	{
-		free(philo);
-		return (NULL);
-	}
-	return (philo);
+	if (philo->max_meals == 0)
+		return (-1);
+	if (grap_forks(philo))
+		return (philo->id);
+	if (print_message(EAT, philo))
+		return (philo->id);
+	philo->last_meal = get_time_ms(0);
+	if (precise_usleep(philo->t_to_eat, philo))
+		return (philo->id);
+	philo->max_meals--;
+	if(throw_forks(philo))
+		return (philo->id);
+	return (0);
 }
 
-void	eat(t_data *data, int id, t_philo *philo, long start)
+int	sleep_philo(t_philo *philo)
 {
-	sem_wait(data->forks);
-	sem_wait(data->forks);
-	print_message(id, FORK, data->start_time, data->print);
-	print_message(id, FORK, data->start_time, data->print);
-	print_message(id, EAT, data->start_time, data->print);
-	sem_wait(philo->last_meal_sem);
-	philo->last_meal = get_time_ms(start);
-	sem_post(philo->last_meal_sem);
-	philo->meals++;
-	precise_usleep(data->time_to_eat);
-	sem_post(data->forks);
-	sem_post(data->forks);
+	if (print_message(SLEEP, philo))
+		return (1);
+	precise_usleep(philo->t_to_sleep, philo);
+	return (0);
 }
 
+int	think(t_philo *philo)
+{
+	if (print_message(THINK, philo))
+		return (1);
+
+	return (0);
+}

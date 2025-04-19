@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 19:28:43 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/18 15:44:46 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/19 19:05:01 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,73 +14,80 @@
 
 int	init_args(int argc, char **argv, t_data *data)
 {
-	data->nb_philo = ft_atoi(argv[1]);
-	data->time_to_die = ft_atoi(argv[2]);
-	data->time_to_eat = ft_atoi(argv[3]);
-	data->time_to_sleep = ft_atoi(argv[4]);
+	data->n_philo = ft_atoi(argv[1]);
+	data->t_to_die = ft_atoi(argv[2]);
+	data->t_to_eat = ft_atoi(argv[3]);
+	data->t_to_sleep = ft_atoi(argv[4]);
+	data->max_meals = -1;
 	if (argc == 6)
 		data->max_meals = ft_atoi(argv[5]);
-	else
-		data->max_meals = -1;
 	if (check_args(data) != 0)
 		return (1);
-	data->philo_pid = malloc(sizeof(int) * data->nb_philo);
-	if (!data->philo_pid)
+	data->is_dead = 0;
+	data->forks = NULL;
+	data->n_philo_eat = NULL;
+	data->death = NULL;
+	data->philos = malloc(sizeof(t_philo) * data->n_philo);
+	if (!data->philos)
+	{
+		ft_print_error("Error: Failed to allocate memory for philosophers\n");
 		return (1);
+	}
 	return (0);
 }
 
 int	init_semaphores(t_data *data)
 {
+	int	n_philo_eat;
+
 	sem_unlink("/death");
-	data->death = sem_open("/death", O_CREAT, 0644, 0);
-	if(data->death == SEM_FAILED)
-	{
-		free(data->philo_pid);
-		free(data);
-		return (1);
-	}
-	sem_post(data->death);
-    sem_wait(data->death);
-	sem_unlink("/meals");
-	data->meals = sem_open("/meals", O_CREAT, 0644, 0);
-	if (data->meals == SEM_FAILED)
-	{
-		free(data->philo_pid);
-		free(data);
-		return (1);
-	}
-	sem_post(data->meals);
-	sem_wait(data->meals);
 	sem_unlink("/forks");
-	data->forks = sem_open("/forks", O_CREAT, 0644, data->nb_philo);
-	if (data->forks == SEM_FAILED)
+	sem_unlink("/n_philo_eat");
+	n_philo_eat = (data->n_philo / 2);
+	if (data->n_philo & 1)
+		n_philo_eat++;	
+	data->n_philo_eat = sem_open("/n_philo_eat", O_CREAT | O_EXCL, 0644,
+			n_philo_eat);
+	data->death = sem_open("/death", O_CREAT | O_EXCL, 0644, 1);
+	data->forks = sem_open("/forks", O_CREAT | O_EXCL, 0644, data->n_philo);
+	if (data->n_philo_eat == SEM_FAILED || data->death == SEM_FAILED
+		|| data->forks == SEM_FAILED)
 	{
-		free(data->philo_pid);
-		free(data);
+		ft_print_error("Error: Failed to create semaphore\n");
+		cleanup_simulation(data);
 		return (1);
 	}
-	sem_post(data->forks);
-	sem_wait(data->forks);
-	sem_unlink("/print");
-	data->print = sem_open("/print", O_CREAT, 0644, 1);
-	
-	if (data->print == SEM_FAILED)
-	{
-		free(data->philo_pid);
-		free(data);
-		return (1);
-	}
-	sem_post(data->print);
-	sem_wait(data->print);
 	return (0);
 }
+int	init_philos(t_data *data)
+{
+	int	i;
 
+	i = -1;
+	while (++i < data->n_philo)
+	{
+		data->philos[i].id = i + 1;
+		data->philos[i].max_meals = data->max_meals;
+		data->philos[i].t_to_die = data->t_to_die;
+		data->philos[i].t_to_eat = data->t_to_eat;
+		data->philos[i].t_to_sleep = data->t_to_sleep;
+		data->philos[i].is_dead = &data->is_dead;
+		data->philos[i].start_time = get_time_ms(0);
+		data->philos[i].last_meal = get_time_ms(0);
+		data->philos[i].pid = 0;
+		data->philos[i].forks = data->forks;
+		data->philos[i].death = data->death;
+		data->philos[i].n_philo_eat = data->n_philo_eat;
+	}
+	return (0);
+}
 int	init_data(int argc, char **argv, t_data *data)
 {
-	if (init_args(argc, argv, data) != 0)
+	if (init_args(argc, argv, data))
 		return (1);
-	if (init_semaphores(data) != 0)
+	if (init_semaphores(data))
+		return (1);
+	if (init_philos(data))
 		return (1);
 	return (0);
 }
