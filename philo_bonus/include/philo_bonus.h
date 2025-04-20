@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 22:12:26 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/19 20:25:14 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/20 03:43:47 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,7 @@ int			ft_atoi(const char *str);
 int			check_args(t_data *data);
 int			ft_print_error(char *str);
 int			check_dead(t_philo *philo);
-int			start_philosopher(int id, t_data *data);
+int			start_philosopher(t_philo *philo, t_data *data);
 int			validate_args(int argc, char **argv);
 int			init_data(int argc, char **argv, t_data *data);
 #endif

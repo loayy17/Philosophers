@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 19:27:08 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/19 21:08:13 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/20 03:51:04 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,53 +22,38 @@ int	check_dead(t_philo *philo)
 		return (1);
 	}
 	sem_post(philo->death);
+	if (philo->max_meals == 0)
+		return (1);
 	return (0);
 }
 
-void	free_philo(t_philo *philo, t_data *data)
+int	start_philosopher(t_philo *philo, t_data *data)
 {
-	(void)data;
-	if (philo->forks != SEM_FAILED)
-		sem_close(philo->forks);
-	if (philo->n_philo_eat != SEM_FAILED)
-		sem_close(philo->n_philo_eat);
-	if (philo->death != SEM_FAILED)
-		sem_close(philo->death);
-	free(data->philos);
-}
+	int	exit_status;
 
-int	start_philosopher(int id, t_data *data)
-{
-	t_philo	*philo;
-
-	philo = &data->philos[id - 1];
 	philo->pid = getpid();
 	if (data->n_philo == 1)
 	{
-		if (print_message(FORK, philo))
-			return (philo->id);
+		print_message(FORK, philo);
 		precise_usleep(data->t_to_die, philo);
-		sem_post(data->forks);
-		clean_child_data(philo, data);
-		exit(philo->id);
 	}
-	while (1)
+	while (data->n_philo > 1)
 	{
 		if (check_dead(philo))
 			break ;
 		if (eat(philo))
 			break ;
-		if (data->max_meals && sleep_philo(philo))
+		if (sleep_philo(philo))
 			break ;
-		if (data->max_meals && think(philo))
+		if (think(philo))
 			break ;
 	}
-	id = philo->id;
-	clean_child_data(philo, data);
 	if (philo->max_meals == 0)
-		exit(0);
+		exit_status = 0;
 	else
-		exit(id);
+		exit_status = philo->id;
+	clean_child_data(philo, data);
+	exit(exit_status);
 }
 
 int	grap_forks(t_philo *philo)
@@ -106,7 +91,7 @@ int	eat(t_philo *philo)
 	if (precise_usleep(philo->t_to_eat, philo))
 		return (philo->id);
 	philo->max_meals--;
-	if(throw_forks(philo))
+	if (throw_forks(philo))
 		return (philo->id);
 	return (0);
 }

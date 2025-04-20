@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 19:26:15 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/19 21:16:02 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/20 03:43:59 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ void	wait_children(t_data *data)
 			break ;
 		}
 	}
-	kill_children(data, data->n_philo);
+	// kill_children(data, data->n_philo);
 }
 
 int	start_process(t_data *data)
@@ -74,7 +74,7 @@ int	start_process(t_data *data)
 		}
 		if (data->philos[i].pid == 0)
 		{
-			philo_broken = start_philosopher(i + 1, data);
+			philo_broken = start_philosopher(&data->philos[i] ,data);
 		}
 		if (philo_broken)
 		{

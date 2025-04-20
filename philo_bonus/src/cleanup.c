@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 19:26:05 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/19 20:40:04 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/20 03:47:21 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,7 @@ void	clean_child_data(t_philo *philo, t_data *data)
 		sem_close(philo->n_philo_eat);
 	if (philo->death != SEM_FAILED)
 		sem_close(philo->death);
-	if (data->philos)
-		free(data->philos);
+	free(data->philos);
 }
 void	cleanup_simulation(t_data *data)
 {
