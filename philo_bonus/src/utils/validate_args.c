@@ -84,16 +84,4 @@ int	validate_args(int argc, char **argv)
 	return (0);
 }
 
-int	check_args(t_data *data)
-{
-	if (data->n_philo < 1 || data->t_to_die < 0 || data->t_to_eat < 0
-		|| data->t_to_sleep < 0 || (data->max_meals != -1
-			&& data->max_meals < 1))
-	{
-		printf("%d %d %d %d %d\n", data->n_philo, data->t_to_die,
-			data->t_to_eat, data->t_to_sleep, data->max_meals);
-		ft_print_error("Error: Invalid argument\n");
-		return (1);
-	}
-	return (0);
-}
+

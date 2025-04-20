@@ -12,6 +12,18 @@
 
 #include "philo_bonus.h"
 
+int	check_args(t_data *data)
+{
+	if (data->n_philo < 1 || data->t_to_die < 0 || data->t_to_eat < 0
+		|| data->t_to_sleep < 0 || (data->max_meals != -1
+			&& data->max_meals < 1))
+	{
+		ft_print_error("Error: Invalid argument\n");
+		return (1);
+	}
+	return (0);
+}
+
 int	init_args(int argc, char **argv, t_data *data)
 {
 	data->n_philo = ft_atoi(argv[1]);
@@ -74,7 +86,7 @@ int	init_philos(t_data *data)
 		data->philos[i].is_dead = &data->is_dead;
 		data->philos[i].start_time = get_time_ms(0);
 		data->philos[i].last_meal = get_time_ms(0);
-		data->philos[i].pid = 0;
+		data->philos[i].n_forks = data->n_philo;
 		data->philos[i].forks = data->forks;
 		data->philos[i].death = data->death;
 		data->philos[i].n_philo_eat = data->n_philo_eat;

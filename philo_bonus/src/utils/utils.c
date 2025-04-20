@@ -15,6 +15,20 @@
 
 #include "philo_bonus.h"
 
+
+void	kill_children(t_data *data, int i)
+{
+	int	j;
+	(void)i;
+
+	j = -1;
+	while (++j < data->n_philo)
+	{
+		if(data->philos[j].pid != 0)
+			kill(data->philos[j].pid, SIGKILL);
+	}
+}
+
 long	get_time_ms(long start)
 {
 	struct timeval	tv;
@@ -33,7 +47,7 @@ int	precise_usleep(long time_wait,t_philo *philo)
 		if (check_dead(philo))
 			return(-1);
 		if (get_time_ms(philo->last_meal) > philo->t_to_die)
-		usleep(1);
+			usleep(1);
 	}
 	return (0);
 }
@@ -45,21 +59,20 @@ int	print_message(int type, t_philo *philo)
 	time = get_time_ms(philo->start_time);
 	if (check_dead(philo))
 		return (-1);
-	if (type == SLEEP)
+	if (type == SLEEP && !check_dead(philo))
 		printf(YELLOW "| %-6ld | %d | is sleeping    | 🛌 | \n" RESET, time,
 			philo->id);
-	else if (type == EAT)
+	else if (type == EAT && !check_dead(philo))
 		printf(GREEN "| %-6ld | %d | is eating      | 🍝 | \n" RESET, time,
 			philo->id);
-	else if (type == THINK)
+	else if (type == THINK && !check_dead(philo))
 		printf(MAGENTA "| %-6ld | %d | is thinking    | 🍴 | \n" RESET, time,
 			philo->id);
-	else if (type == FORK)
+	else if (type == FORK && !check_dead(philo))
 		printf(BLUE "| %-6ld | %d | is taking fork | 🍴 | \n" RESET, time,
 			philo->id);
 	else if (type == DEAD)
-		printf(RED "| %-6ld | %d | is dead        | 💀 | \n" RESET, time,
-			philo->id);
-	fflush(stdout);		
+		printf(RED "| %-6ld | %d | is dead         | 💀 | \n" RESET, time,
+			philo->id);		
 	return (0);
 }

@@ -86,4 +86,7 @@ void				free_forks(t_data *data, int n);
 void				free_philos(t_data *data);
 int					dead_lock_checker(t_data *data);
 int					ft_strcmp(const char *s1, const char *s2);
+void initialize_philosopher(t_data *data, int i);
+void	cleanup_mutexes(t_data *data, int ret, int i);
+int 	check_args(t_data *data, int argc);
 #endif

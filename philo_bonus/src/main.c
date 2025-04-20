@@ -22,6 +22,8 @@ void	free_data(t_data *data)
 		sem_close(data->n_philo_eat);
 	if (data->death != SEM_FAILED)
 		sem_close(data->death);
+	if(data->philos)
+		free(data->philos);
 }
 
 void	wait_children(t_data *data)
@@ -29,7 +31,6 @@ void	wait_children(t_data *data)
 	int		i;
 	int		status;
 	int		id;
-	long	time;
 	int		meals_completed;
 
 	i = -1;
@@ -38,22 +39,22 @@ void	wait_children(t_data *data)
 	{
 		waitpid(-1, &status, 0);
 		id = (((status)&0xff00) >> 8);
-		if (id == 0)
+		
+		if (id != 0)
+		{long time =get_time_ms(data->philos[id - 1].last_meal);
+			printf(RED "| %-6ld | %d | is dead        | 💀 | \n" RESET, time,
+		id);
+			break ;
+		}
+		else
 		{
 			meals_completed++;
 			if (meals_completed == data->n_philo)
 				break ;
-			
-		}
-		else
-		{
-			time = get_time_ms(data->philos[id - 1].last_meal);
-			printf(RED "| %-6ld | %d | is dead        | 💀 | \n" RESET, time,
-				id);
-			break ;
 		}
 	}
-	// kill_children(data, data->n_philo);
+	kill_children(data, i);
+	
 }
 
 int	start_process(t_data *data)

@@ -22,9 +22,7 @@ int	check_dead(t_philo *philo)
 		return (1);
 	}
 	sem_post(philo->death);
-	if (philo->max_meals == 0)
-		return (1);
-	return (0);
+	return (philo->max_meals == 0);
 }
 
 int	start_philosopher(t_philo *philo, t_data *data)
@@ -39,16 +37,10 @@ int	start_philosopher(t_philo *philo, t_data *data)
 	}
 	while (data->n_philo > 1)
 	{
-		if (check_dead(philo))
-			break ;
-		if (eat(philo))
-			break ;
-		if (sleep_philo(philo))
-			break ;
-		if (think(philo))
+		if (check_dead(philo) || eat(philo) || sleep_philo(philo) || think(philo))
 			break ;
 	}
-	if (philo->max_meals == 0)
+	if(philo->max_meals == 0)
 		exit_status = 0;
 	else
 		exit_status = philo->id;
@@ -58,23 +50,33 @@ int	start_philosopher(t_philo *philo, t_data *data)
 
 int	grap_forks(t_philo *philo)
 {
+	if (check_dead(philo))
+		return (-1);
 	sem_wait(philo->n_philo_eat);
-	sem_wait(philo->forks);
-	if (print_message(FORK, philo))
-		return (-1);
 	if (check_dead(philo))
 		return (-1);
 	sem_wait(philo->forks);
-	if (print_message(FORK, philo))
-		return (-1);
-	if (check_dead(philo))
+	philo->n_forks--;
+	if(philo->n_forks == 1)
+		{
+		if(precise_usleep(philo->t_to_die, philo))
+			return (-1);
+		}
+	if (print_message(FORK, philo) || check_dead(philo))
+	return (-1);
+	philo->n_forks--;
+	sem_wait(philo->forks);
+	if (print_message(FORK, philo) || check_dead(philo))
 		return (-1);
 	return (0);
 }
+
 int	throw_forks(t_philo *philo)
 {
 	sem_post(philo->forks);
+	philo->n_forks++;
 	sem_post(philo->forks);
+	philo->n_forks++;
 	sem_post(philo->n_philo_eat);
 	return (0);
 }
@@ -83,9 +85,7 @@ int	eat(t_philo *philo)
 {
 	if (philo->max_meals == 0)
 		return (-1);
-	if (grap_forks(philo))
-		return (philo->id);
-	if (print_message(EAT, philo))
+	if (grap_forks(philo) || print_message(EAT, philo))
 		return (philo->id);
 	philo->last_meal = get_time_ms(0);
 	if (precise_usleep(philo->t_to_eat, philo))

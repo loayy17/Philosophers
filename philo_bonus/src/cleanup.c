@@ -12,16 +12,7 @@
 
 #include "philo_bonus.h"
 
-void	kill_children(t_data *data, int i)
-{
-	int	j;
 
-	j = -1;
-	while (++j < i)
-	{
-		kill(data->philos[j].pid, SIGKILL);
-	}
-}
 void	clean_child_data(t_philo *philo, t_data *data)
 {
 	if (philo->forks != SEM_FAILED)
@@ -29,7 +20,7 @@ void	clean_child_data(t_philo *philo, t_data *data)
 	if (philo->n_philo_eat != SEM_FAILED)
 		sem_close(philo->n_philo_eat);
 	if (philo->death != SEM_FAILED)
-		sem_close(philo->death);
+		sem_close(philo->death);	
 	free(data->philos);
 }
 void	cleanup_simulation(t_data *data)

@@ -45,6 +45,7 @@ typedef struct s_philo
 	int		t_to_eat;
 	int		t_to_sleep;
 	int		max_meals;
+	int		n_forks;
 	long	start_time;
 	long	death_time;
 	long	last_meal;
