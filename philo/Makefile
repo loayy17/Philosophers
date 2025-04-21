@@ -1,17 +1,12 @@
 CC = cc
 NAME = philo
 CFLAGS = -Wall -Wextra -Werror ${INCLUDE}
-SRCS = main.c \
-		src/check_args.c \
-		src/cleanup.c \
-		src/init.c \
-		src/monitor.c \
+SRCS = src/main.c \
 		src/philo_actions.c \
-		src/utils/philo_utils.c \
-		src/utils/print_utils.c \
-		src/utils/time_utils.c \
-		src/utils/checker_utils.c
-
+		src/cleanup.c \
+		src/utils/init.c \
+		src/utils/utils.c \
+		src/utils/check_args.c 
 OBJS_DIR = obj
 INCLUDE = -I./include
 OBJS = $(SRCS:.c=.o)
