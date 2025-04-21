@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 19:28:43 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/19 19:05:01 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/21 02:55:49 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,6 +90,7 @@ int	init_philos(t_data *data)
 		data->philos[i].forks = data->forks;
 		data->philos[i].death = data->death;
 		data->philos[i].n_philo_eat = data->n_philo_eat;
+		data->philos[i].death_time = 0;
 	}
 	return (0);
 }

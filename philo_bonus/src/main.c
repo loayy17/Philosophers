@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 19:26:15 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/20 03:43:59 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/21 03:32:01 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void	free_data(t_data *data)
 		sem_close(data->n_philo_eat);
 	if (data->death != SEM_FAILED)
 		sem_close(data->death);
-	if(data->philos)
+	if (data->philos)
 		free(data->philos);
 }
 
@@ -39,22 +39,25 @@ void	wait_children(t_data *data)
 	{
 		waitpid(-1, &status, 0);
 		id = (((status)&0xff00) >> 8);
-		
 		if (id != 0)
-		{long time =get_time_ms(data->philos[id - 1].last_meal);
-			printf(RED "| %-6ld | %d | is dead        | 💀 | \n" RESET, time,
-		id);
+		{
+			sem_wait(data->death);
+			
+			data->philos[id - 1].death_time = get_time_ms(data->philos[id - 1].start_time);
+			kill_children(data, data->n_philo);
 			break ;
 		}
 		else
 		{
 			meals_completed++;
 			if (meals_completed == data->n_philo)
-				break ;
+			{
+				kill_children(data, i);
+				return ;
+			}
 		}
 	}
-	kill_children(data, i);
-	
+	printf(RED "| %-6ld | %d | is dead        | 💀 | \n" RESET, data->philos[id - 1].death_time,id);
 }
 
 int	start_process(t_data *data)
@@ -75,7 +78,7 @@ int	start_process(t_data *data)
 		}
 		if (data->philos[i].pid == 0)
 		{
-			philo_broken = start_philosopher(&data->philos[i] ,data);
+			philo_broken = start_philosopher(&data->philos[i], data);
 		}
 		if (philo_broken)
 		{
