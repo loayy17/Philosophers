@@ -42,8 +42,8 @@ typedef struct s_philo
 	long death_time;
 	int             dead_flag;
 	pthread_t       thread;
-	pthread_mutex_t meal_lock;   /* protects last_meal & meals_eaten */
-	pthread_mutex_t dead_lock;   /* protects dead_flag */
+	pthread_mutex_t meal_lock;
+	pthread_mutex_t dead_lock;
 	pthread_mutex_t *left_fork;
 	pthread_mutex_t *right_fork;
 	pthread_mutex_t *print_lock;

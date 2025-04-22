@@ -16,15 +16,13 @@ static void eat(t_philo *p)
 {
 	
 	pthread_mutex_lock(&p->meal_lock);
-	p->last_meal = get_time(0);
 	print_message(p, EAT);
+	p->last_meal = get_time(0);
 	p->meals_eaten++;
 	pthread_mutex_unlock(&p->meal_lock);
-
 	precise_usleep(p->t_eat, p);
 }
 
-/* grab forks in even/odd order to avoid deadlock */
 static void grab_forks(t_philo *p)
 {
 	if (p->id % 2 == 0)

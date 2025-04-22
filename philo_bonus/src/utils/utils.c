@@ -47,7 +47,7 @@ int	precise_usleep(long time_wait,t_philo *philo)
 		if (check_dead(philo))
 			return(-1);
 		if (get_time_ms(philo->last_meal) > philo->t_to_die)
-			usleep(1);
+			usleep(10);
 	}
 	return (0);
 }

@@ -14,20 +14,17 @@
 static int check_philosopher(t_philo *p)
 {
 	long elapsed;
-
-	pthread_mutex_lock(&p->meal_lock);
+	
 	elapsed = get_time(p->last_meal);
 	pthread_mutex_lock(&p->dead_lock);
 	if (!p->dead_flag && elapsed > p->t_die)
 	{
-		p->dead_flag = 1;
 		p->death_time = get_time(p->start_time);
+		p->dead_flag = 1;
 		pthread_mutex_unlock(&p->dead_lock);
-		pthread_mutex_unlock(&p->meal_lock);
 		return 1;
 	}
 	pthread_mutex_unlock(&p->dead_lock);
-	pthread_mutex_unlock(&p->meal_lock);
 	return 0;
 }
 
@@ -81,7 +78,7 @@ static void monitor_loop(t_data *d)
 			}
 		if (check_meals(d))
 			return;
-		usleep(100);
+		usleep(1000);
 	}
 }
 
