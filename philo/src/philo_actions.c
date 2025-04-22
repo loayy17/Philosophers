@@ -1,90 +1,88 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   philo_actions.c                                    :+:      :+:    :+:   */
+/*   philo_actions.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
+/*   By: <you>                                        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/21 05:36:19 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/21 05:36:20 by lalhindi         ###   ########.fr       */
+/*   Created: 2025/04/21                               #+#    #+#             */
+/*   Updated: 2025/04/21                               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-static void	eat(t_philo *philo)
+static void eat(t_philo *p)
 {
-	pthread_mutex_lock(philo->meal_lock);
-	philo->last_meal = get_time(0);
-	philo->meals_eaten++;
-	pthread_mutex_unlock(philo->meal_lock);
-	print_message(philo, EAT);
-	precise_usleep(philo->t_eat, philo);
+	
+	pthread_mutex_lock(&p->meal_lock);
+	p->last_meal = get_time(0);
+	print_message(p, EAT);
+	p->meals_eaten++;
+	pthread_mutex_unlock(&p->meal_lock);
+
+	precise_usleep(p->t_eat, p);
 }
 
-static void	drop_forks(pthread_mutex_t *f1, pthread_mutex_t *f2)
+/* grab forks in even/odd order to avoid deadlock */
+static void grab_forks(t_philo *p)
 {
-	pthread_mutex_unlock(f2);
-	pthread_mutex_unlock(f1);
-}
-
-static int	grab_forks(t_philo *philo)
-{
-	if (philo->id % 2 == 0)
+	if (p->id % 2 == 0)
 	{
-		pthread_mutex_lock(philo->left_fork);
-		print_message(philo, FORKS);
-		if (*philo->dead_flag)
-			return (pthread_mutex_unlock(philo->left_fork), 1);
-		pthread_mutex_lock(philo->right_fork);
-		print_message(philo, FORKS);
+		pthread_mutex_lock(p->left_fork);
+		print_message(p, FORKS);
+		pthread_mutex_lock(p->right_fork);
+		print_message(p, FORKS);
 	}
 	else
 	{
-		pthread_mutex_lock(philo->right_fork);
-		print_message(philo, FORKS);
-		if (*philo->dead_flag)
-			return (pthread_mutex_unlock(philo->right_fork), 1);
-		pthread_mutex_lock(philo->left_fork);
-		print_message(philo, FORKS);
+		pthread_mutex_lock(p->right_fork);
+		print_message(p, FORKS);
+		pthread_mutex_lock(p->left_fork);
+		print_message(p, FORKS);
 	}
-	return (0);
 }
 
-int	checker_dead_lock(t_philo *philo)
+/* release both forks */
+static void drop_forks(t_philo *p)
 {
-	pthread_mutex_lock(philo->death_lock);
-	if (*philo->dead_flag)
-	{
-		pthread_mutex_unlock(philo->death_lock);
-		return (1);
-	}
-	pthread_mutex_unlock(philo->death_lock);
-	return (0);
+	pthread_mutex_unlock(p->left_fork);
+	pthread_mutex_unlock(p->right_fork);
 }
 
-void	*philo_routine(void *arg)
+void *philo_routine(void *arg)
 {
-	t_philo *philo;
+	t_philo *p = (t_philo *)arg;
 
-	philo = (t_philo *)arg;
-	if (philo->n_philos == 1)
+	/* special case: 1 philosopher just holds fork until death */
+	if (p->left_fork == p->right_fork)
 	{
-		pthread_mutex_lock(philo->left_fork);
-		print_message(philo, FORKS);
-		pthread_mutex_unlock(philo->left_fork);
-		precise_usleep(philo->t_die, philo);
+		pthread_mutex_lock(p->left_fork);
+		print_message(p, FORKS);
+		pthread_mutex_unlock(p->left_fork);
+		precise_usleep(p->t_die, p);
 		return (NULL);
 	}
-	while (!checker_dead_lock(philo))
+
+	while (1)
 	{
-		if (grab_forks(philo))
-			break ;
-		eat(philo);
-		drop_forks(philo->left_fork, philo->right_fork);
-		print_message(philo, SLEEP);
-		precise_usleep(philo->t_sleep, philo);
-		print_message(philo, THINK);
+		/* if flagged dead, exit */
+		pthread_mutex_lock(&p->dead_lock);
+		if (p->dead_flag)
+		{
+			pthread_mutex_unlock(&p->dead_lock);
+			break;
+		}
+		pthread_mutex_unlock(&p->dead_lock);
+
+		grab_forks(p);
+		eat(p);
+		drop_forks(p);
+
+		print_message(p, SLEEP);
+		precise_usleep(p->t_sleep, p);
+
+		print_message(p, THINK);
 	}
 	return (NULL);
 }
