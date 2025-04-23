@@ -15,7 +15,9 @@ static int check_philosopher(t_philo *p)
 {
 	long elapsed;
 	
+	pthread_mutex_lock(&p->meal_lock);
 	elapsed = get_time(p->last_meal);
+	pthread_mutex_unlock(&p->meal_lock);
 	pthread_mutex_lock(&p->dead_lock);
 	if (!p->dead_flag && elapsed > p->t_die)
 	{
@@ -53,7 +55,7 @@ static int check_meals(t_data *d)
 	return all;
 }
 
-static void monitor_loop(t_data *d)
+static int monitor_loop(t_data *d)
 {
 	int i;
 	int dead_philo = 0;
@@ -70,28 +72,30 @@ static void monitor_loop(t_data *d)
 					d->philos[j].dead_flag = 1;
 					pthread_mutex_unlock(&d->philos[j].dead_lock);
 				}
-				pthread_mutex_lock(&d->print_lock);
-				printf(RED "| %-6ld | %d | is dead         | 💀 | \n" RESET,
-					d->philos[dead_philo - 1].death_time, dead_philo);
-		pthread_mutex_unlock(&d->print_lock);
-				return;
+				return (dead_philo);
 			}
 		if (check_meals(d))
-			return;
-		usleep(1000);
+			return (0);
+		usleep(500);
 	}
+	return (0);
 }
 
 int main(int argc, char **argv)
 {
 	t_data data;
-
+	int philo_dead;
+	long death_time;
 	if (validate_args(argc, argv))
 		return 1;
 	if (init_data(&data, argc, argv))
 		return 1;
 
-	monitor_loop(&data);
+	philo_dead = monitor_loop(&data);
+	if(philo_dead)
+		death_time = get_time(data.philos[philo_dead - 1].start_time);
 	cleanup_resources(&data);
+	printf(RED "| %-6ld | %d | died           | 💀 | \n" RESET, death_time,
+		philo_dead);
 	return 0;
 }

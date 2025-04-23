@@ -14,12 +14,12 @@
 
 static void eat(t_philo *p)
 {
-	
 	pthread_mutex_lock(&p->meal_lock);
-	print_message(p, EAT);
 	p->last_meal = get_time(0);
 	p->meals_eaten++;
 	pthread_mutex_unlock(&p->meal_lock);
+
+	print_message(p, EAT);
 	precise_usleep(p->t_eat, p);
 }
 
@@ -34,6 +34,7 @@ static void grab_forks(t_philo *p)
 	}
 	else
 	{
+		precise_usleep(1, p);
 		pthread_mutex_lock(p->right_fork);
 		print_message(p, FORKS);
 		pthread_mutex_lock(p->left_fork);
@@ -41,7 +42,6 @@ static void grab_forks(t_philo *p)
 	}
 }
 
-/* release both forks */
 static void drop_forks(t_philo *p)
 {
 	pthread_mutex_unlock(p->left_fork);
@@ -52,7 +52,6 @@ void *philo_routine(void *arg)
 {
 	t_philo *p = (t_philo *)arg;
 
-	/* special case: 1 philosopher just holds fork until death */
 	if (p->left_fork == p->right_fork)
 	{
 		pthread_mutex_lock(p->left_fork);
@@ -61,26 +60,20 @@ void *philo_routine(void *arg)
 		precise_usleep(p->t_die, p);
 		return (NULL);
 	}
-
+	if(p->id & 1)
+		precise_usleep(1, p);
 	while (1)
 	{
-		/* if flagged dead, exit */
-		pthread_mutex_lock(&p->dead_lock);
-		if (p->dead_flag)
-		{
-			pthread_mutex_unlock(&p->dead_lock);
+		if(is_dead(p))
 			break;
-		}
-		pthread_mutex_unlock(&p->dead_lock);
-
 		grab_forks(p);
 		eat(p);
 		drop_forks(p);
-
 		print_message(p, SLEEP);
 		precise_usleep(p->t_sleep, p);
-
 		print_message(p, THINK);
+		if (is_dead(p))
+			break;
 	}
 	return (NULL);
 }
