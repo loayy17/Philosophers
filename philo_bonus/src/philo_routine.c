@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 19:27:08 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/21 02:59:39 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/24 21:28:08 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ int	check_dead(t_philo *philo)
 	if (get_time_ms(philo->last_meal) > philo->t_to_die)
 	{
 		philo->last_meal = get_time_ms(philo->start_time);
+		philo->is_dead = 1;
 		sem_post(philo->death);
 		return (1);
 	}
@@ -32,12 +33,18 @@ int	start_philosopher(t_philo *philo, t_data *data)
 	philo->pid = getpid();
 	if (data->n_philo == 1)
 	{
-		print_message(FORK, philo);
+		print_message(philo, FORK, BLUE, "🍴");
 		precise_usleep(data->t_to_die, philo);
 	}
 	while (data->n_philo > 1)
 	{
-		if (check_dead(philo) || eat(philo) || sleep_philo(philo) || think(philo))
+		if(check_dead(philo))
+			break ;
+		if(eat(philo))
+			break ;
+		if (sleep_philo(philo))
+			break ;
+		if (think(philo))
 			break ;
 	}
 	if(philo->max_meals == 0)
@@ -56,17 +63,12 @@ int	grap_forks(t_philo *philo)
 	if (check_dead(philo))
 		return (-1);
 	sem_wait(philo->forks);
-	philo->n_forks--;
-	if(philo->n_forks == 1)
-		{
-		if(precise_usleep(philo->t_to_die, philo))
-			return (-1);
-		}
-	if (print_message(FORK, philo) || check_dead(philo))
-	return (-1);
-	philo->n_forks--;
+	if (print_message(philo , FORK, MAGENTA,"🍴"))
+		return (-1);
+	if(check_dead(philo))
+		return (-1);
 	sem_wait(philo->forks);
-	if (print_message(FORK, philo) || check_dead(philo))
+	if (print_message(philo, FORK, MAGENTA,"🍴"))
 		return (-1);
 	return (0);
 }
@@ -74,9 +76,7 @@ int	grap_forks(t_philo *philo)
 int	throw_forks(t_philo *philo)
 {
 	sem_post(philo->forks);
-	philo->n_forks++;
 	sem_post(philo->forks);
-	philo->n_forks++;
 	sem_post(philo->n_philo_eat);
 	return (0);
 }
@@ -85,12 +85,14 @@ int	eat(t_philo *philo)
 {
 	if (philo->max_meals == 0)
 		return (-1);
-	if (grap_forks(philo) || print_message(EAT, philo))
+	if (grap_forks(philo))
 		return (philo->id);
+	if(print_message(philo, EAT, GREEN, "🍝"))
+		return (philo->id);	
 	philo->last_meal = get_time_ms(0);
+	philo->max_meals--;
 	if (precise_usleep(philo->t_to_eat, philo))
 		return (philo->id);
-	philo->max_meals--;
 	if (throw_forks(philo))
 		return (philo->id);
 	return (0);
@@ -98,15 +100,16 @@ int	eat(t_philo *philo)
 
 int	sleep_philo(t_philo *philo)
 {
-	if (print_message(SLEEP, philo))
+	if (print_message( philo,SLEEP, YELLOW, "🛌"))
 		return (1);
-	precise_usleep(philo->t_to_sleep, philo);
+	if(precise_usleep(philo->t_to_sleep, philo))
+		return (1);
 	return (0);
 }
 
 int	think(t_philo *philo)
 {
-	if (print_message(THINK, philo))
+	if (print_message( philo,THINK, MAGENTA, "🤔"))
 		return (1);
 
 	return (0);

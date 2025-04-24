@@ -55,28 +55,20 @@ int is_dead(t_philo *p)
 	return (flag);
 }
 
-void print_message(t_philo *philo, int type)
+int print_message(t_philo *philo, char *status, char *color, char *emoji)
 {
-	long	time;
-	
-	time = get_time(philo->start_time);
-	if (is_dead(philo))
-		return ;
-	pthread_mutex_lock(philo->print_lock);
-	if (type == SLEEP)
-		printf(YELLOW "| %-6ld | %d | is sleeping    | 🛌 | \n" RESET, time,
-			philo->id);
-	else if (type == EAT)
-		printf(GREEN "| %-6ld | %d | is eating      | 🍝 | \n" RESET, time,
-			philo->id);
-	else if (type == THINK)
-		printf(MAGENTA "| %-6ld | %d | is thinking    | 🍴 | \n" RESET, time,
-			philo->id);
-	else if (type == FORKS)
-		printf(BLUE "| %-6ld | %d | is taking fork | 🍴 | \n" RESET, time,
-			philo->id);
-	else if (type == DEAD)
-		printf(RED "| %-6ld | %d | is dead         | 💀 | \n" RESET, time,
-			philo->id);				
-	pthread_mutex_unlock(philo->print_lock);		
+    long time;
+
+    pthread_mutex_lock(philo->print_lock);
+	pthread_mutex_lock(&philo->dead_lock);
+    if (philo->dead_flag) {
+        pthread_mutex_unlock(philo->print_lock);
+		pthread_mutex_unlock(&philo->dead_lock);
+        return (1);
+    }
+    time = get_time(philo->start_time);
+    printf("%s| %-6ld | %-3d | %-16s    |  %s  |\n"RESET,color, time, philo->id, status, emoji);
+    pthread_mutex_unlock(philo->print_lock);
+    pthread_mutex_unlock(&philo->dead_lock);
+	return (0);
 }

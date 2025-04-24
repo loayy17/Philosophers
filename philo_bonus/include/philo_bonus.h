@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 22:12:26 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/20 03:43:47 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/23 20:46:36 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,11 +24,11 @@
 # include <sys/wait.h>
 # include <unistd.h>
 
-# define FORK 1
-# define EAT 2
-# define SLEEP 3
-# define THINK 4
-# define DEAD 5
+# define FORK "has taken a fork"
+# define EAT "is eating"
+# define SLEEP "is sleeping"
+# define THINK "is thinking"
+# define DEAD "is dead"
 
 # define RED "\033[31m"
 # define GREEN "\033[32m"
@@ -45,14 +45,14 @@ typedef struct s_philo
 	int		t_to_eat;
 	int		t_to_sleep;
 	int		max_meals;
-	int		n_forks;
 	long	start_time;
 	long	death_time;
 	long	last_meal;
-	int		*is_dead;
+	int		is_dead;
 	sem_t	*forks;
 	sem_t	*n_philo_eat;
 	sem_t	*death;
+	sem_t	*print_lock;
 }			t_philo;
 
 typedef struct s_data
@@ -67,6 +67,7 @@ typedef struct s_data
 	sem_t	*n_philo_eat;
 	sem_t	*forks;
 	sem_t	*death;
+	sem_t	*print_lock;
 	t_philo	*philos;
 }			t_data;
 
@@ -74,7 +75,7 @@ void		kill_children(t_data *data, int i);
 void		clean_child_data(t_philo *philo, t_data *data);
 void		cleanup_simulation(t_data *data);
 long		get_time_ms(long start);
-int			print_message(int type, t_philo *philo);
+int    print_message(t_philo *philo, char *status, char *color, char *emoji);
 int			precise_usleep(long time_wait, t_philo *philo);
 int			eat(t_philo *philo);
 int			sleep_philo(t_philo *philo);

@@ -12,14 +12,23 @@
 
 #include "philo.h"
 
-static void init_args(t_data *d, int argc, char **argv)
+static int init_args(t_data *d, int argc, char **argv)
 {
-	d->n_philos   = atoi(argv[1]);
-	d->t_die      = atol(argv[2]);  /* note: stored per-philo below */
-	d->t_eat      = atol(argv[3]);
-	d->t_sleep    = atol(argv[4]);
-	d->n_must_eat = (argc == 6) ? atoi(argv[5]) : -1;
+	d->n_philos   = ft_atoi(argv[1]);
+	d->t_die      = ft_atoi(argv[2]); 
+	d->t_eat      = ft_atoi(argv[3]);
+	d->t_sleep    = ft_atoi(argv[4]);
+	if(argc == 6)
+		d->n_must_eat = ft_atoi(argv[5]);
+	else 
+		d->n_must_eat = -1;
+	if (d->n_philos < 1 || d->t_die <= 0 || d->t_eat <= 0 || d->t_sleep <= 0 || (d->n_must_eat <= 0 && d->n_must_eat != -1))
+	{
+		ft_print_error("Error: Invalid arguments\n");
+		return (1);
+	}
 	d->start_time = get_time(0);
+	return (0);
 }
 
 static int init_mutexes(t_data *d)
@@ -79,7 +88,8 @@ static int spawn_philos(t_data *d)
 
 int init_data(t_data *d, int argc, char **argv)
 {
-	init_args(d, argc, argv);
+	if(init_args(d, argc, argv))
+		return (1);
 	if (init_mutexes(d))
 		return (1);
 	if (spawn_philos(d))

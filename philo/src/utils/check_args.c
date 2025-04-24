@@ -12,7 +12,31 @@
 
 #include "philo.h"
 
-/* ensure string is all digits (allow leading '+') */
+int	ft_atoi(const char *str)
+{
+	long	res;
+	int		sign;
+
+	res = 0;
+	sign = 1;
+	while (*str == ' ' || (*str >= '\t' && *str <= '\r'))
+		str++;
+	if (*str == '-' || *str == '+')
+	{
+		if (*str == '-')
+			sign = -1;
+		str++;
+	}
+	while (*str >= '0' && *str <= '9')
+	{
+		res = res * 10 + (*str - '0');
+		str++;
+	}
+	if (res > 2147483647)
+		return (-2);
+	return (res * sign);
+}
+
 static int check_numeric(const char *s)
 {
 	int i = 0;
@@ -40,8 +64,8 @@ int validate_args(int argc, char **argv)
 	{
 		if (!check_numeric(argv[i]))
 		{
-			write(2, "Error: Non-numeric argument: ", 29);
-			write(2, argv[i], strlen(argv[i]));
+			ft_print_error("Error: Non-numeric argument : ");
+			ft_print_error(argv[i]);
 			write(2, "\n", 1);
 			return (1);
 		}

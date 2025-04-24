@@ -45,34 +45,59 @@ int	precise_usleep(long time_wait,t_philo *philo)
 	while (get_time_ms(start) < time_wait)
 	{
 		if (check_dead(philo))
-			return(-1);
-		if (get_time_ms(philo->last_meal) > philo->t_to_die)
-			usleep(10);
+			return(philo->id);
+		usleep(100);
 	}
 	return (0);
 }
 
-int	print_message(int type, t_philo *philo)
+int    print_message(t_philo *philo, char *status, char *color, char *emoji)
 {
 	long	time;
-	
+
 	time = get_time_ms(philo->start_time);
-	if (check_dead(philo))
-		return (-1);
-	if (type == SLEEP && !check_dead(philo))
-		printf(YELLOW "| %-6ld | %d | is sleeping    | 🛌 | \n" RESET, time,
-			philo->id);
-	else if (type == EAT && !check_dead(philo))
-		printf(GREEN "| %-6ld | %d | is eating      | 🍝 | \n" RESET, time,
-			philo->id);
-	else if (type == THINK && !check_dead(philo))
-		printf(MAGENTA "| %-6ld | %d | is thinking    | 🍴 | \n" RESET, time,
-			philo->id);
-	else if (type == FORK && !check_dead(philo))
-		printf(BLUE "| %-6ld | %d | is taking fork | 🍴 | \n" RESET, time,
-			philo->id);
-	else if (type == DEAD)
-		printf(RED "| %-6ld | %d | is dead         | 💀 | \n" RESET, time,
-			philo->id);		
+	sem_wait(philo->print_lock);
+	sem_wait(philo->death);
+	if (philo->is_dead)
+	{
+		sem_post(philo->print_lock);
+		sem_post(philo->death);
+		return (1);
+	}
+	printf("%s| %-6ld | %-3d | %-16s    |  %s  |\n"RESET,color, time, philo->id, status, emoji);
+
+	sem_post(philo->print_lock);
+	sem_post(philo->death);
 	return (0);
 }
+// {
+// 	long	time;
+	
+// 	time = get_time_ms(philo->start_time);
+// 	sem_wait(philo->death);
+// 	sem_wait(philo->print_lock);
+// 	if (*philo->is_dead)
+// 	{
+// 		sem_post(philo->death);
+// 		sem_post(philo->print_lock);
+// 		return (1);
+// 	}
+// 	if (type == SLEEP)
+// 		printf(YELLOW "| %-6ld | %d | is sleeping    | 🛌 | \n" RESET, time,
+// 			philo->id);
+// 	else if (type == EAT)
+// 		printf(GREEN "| %-6ld | %d | is eating      | 🍝 | \n" RESET, time,
+// 			philo->id);
+// 	else if (type == THINK)
+// 		printf(MAGENTA "| %-6ld | %d | is thinking    | 🍴 | \n" RESET, time,
+// 			philo->id);
+// 	else if (type == FORK)
+// 		printf(BLUE "| %-6ld | %d | is taking fork | 🍴 | \n" RESET, time,
+// 			philo->id);
+// 	else if (type == DEAD)
+// 		printf(RED "| %-6ld | %d | is dead         | 💀 | \n" RESET, time,
+// 			philo->id);	
+// 	sem_post(philo->death);	
+// 	sem_post(philo->print_lock);		
+// 	return (0);
+// }

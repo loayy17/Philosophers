@@ -26,10 +26,13 @@
 #define BLUE "\033[34m"
 #define MAGENTA "\033[35m"
 #define RESET "\033[0m"
-/* actions for printing */
-enum e_action { DEAD, FORKS, EAT, SLEEP, THINK };
+#define DEAD "dead"
+#define FORK "is taking a fork"
+#define EAT "is eating"
+#define SLEEP "is sleeping"
+#define THINK "is thinking"
 
-/* philosopher struct holds exactly what each thread needs */
+
 typedef struct s_philo
 {
 	int             id;
@@ -71,8 +74,8 @@ long    get_time(long start);
 void    precise_usleep(long ms, t_philo *philo);
 
 int     is_dead(t_philo *philo);
-void    print_message(t_philo *philo, int action);
-
+int    print_message(t_philo *philo, char *status, char *color, char *emoji);
+int			ft_atoi(const char *str);
 void   *philo_routine(void *arg);
 void ft_print_error(char *str);
 

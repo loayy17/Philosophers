@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 19:26:15 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/21 03:32:01 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/23 21:06:56 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,14 @@ void	free_data(t_data *data)
 	if (data->philos)
 		free(data->philos);
 }
+void	set_all_philos_dead(t_data *data)
+{
+	int	i;
 
+	i = -1;
+	while (++i < data->n_philo)
+		data->philos[i].is_dead = 1;
+}
 void	wait_children(t_data *data)
 {
 	int		i;
@@ -38,11 +45,12 @@ void	wait_children(t_data *data)
 	while (++i < data->n_philo)
 	{
 		waitpid(-1, &status, 0);
+		
 		id = (((status)&0xff00) >> 8);
 		if (id != 0)
 		{
+			set_all_philos_dead(data);
 			sem_wait(data->death);
-			
 			data->philos[id - 1].death_time = get_time_ms(data->philos[id - 1].start_time);
 			kill_children(data, data->n_philo);
 			break ;
@@ -52,6 +60,7 @@ void	wait_children(t_data *data)
 			meals_completed++;
 			if (meals_completed == data->n_philo)
 			{
+				set_all_philos_dead(data);
 				kill_children(data, i);
 				return ;
 			}

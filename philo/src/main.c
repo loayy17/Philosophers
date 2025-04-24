@@ -11,6 +11,20 @@
 
 #include "philo.h"
 
+static int set_philo_dead(t_data *d)
+{
+	int i;
+
+	i = -1;
+	while (++i < d->n_philos)
+	{
+		pthread_mutex_lock(&d->philos[i].dead_lock);
+		d->philos[i].dead_flag = 1;
+		pthread_mutex_unlock(&d->philos[i].dead_lock);
+	}
+	return (1);
+}
+
 static int check_philosopher(t_philo *p)
 {
 	long elapsed;
@@ -46,34 +60,25 @@ static int check_meals(t_data *d)
 		if (!all) break;
 	}
 	if (all)
-		for (i = 0; i < d->n_philos; i++)
-		{
-			pthread_mutex_lock(&d->philos[i].dead_lock);
-			d->philos[i].dead_flag = 1;
-			pthread_mutex_unlock(&d->philos[i].dead_lock);
-		}
+		set_philo_dead(d);
 	return all;
 }
 
 static int monitor_loop(t_data *d)
 {
 	int i;
-	int dead_philo = 0;
+	int dead_philo;
+
+	dead_philo = 0;
 	while (1)
 	{
-		for (i = 0; i < d->n_philos; i++)
-			if (check_philosopher(&d->philos[i]))
-			{
-				dead_philo = i + 1;
-				for (int j = 0; j < d->n_philos; j++)
-				{
-
-					pthread_mutex_lock(&d->philos[j].dead_lock);
-					d->philos[j].dead_flag = 1;
-					pthread_mutex_unlock(&d->philos[j].dead_lock);
-				}
+		i = -1;
+		while (++i < d->n_philos)
+		{
+			dead_philo = i + 1;
+			if (check_philosopher(&d->philos[i]) && set_philo_dead(d))
 				return (dead_philo);
-			}
+		}
 		if (check_meals(d))
 			return (0);
 		usleep(500);
@@ -93,9 +98,10 @@ int main(int argc, char **argv)
 
 	philo_dead = monitor_loop(&data);
 	if(philo_dead)
+	{
 		death_time = get_time(data.philos[philo_dead - 1].start_time);
+		printf(RED "| %-6ld | %-3d | %-16s    |  💀  |\n" RESET, death_time, philo_dead, DEAD);
+	}
 	cleanup_resources(&data);
-	printf(RED "| %-6ld | %d | died           | 💀 | \n" RESET, death_time,
-		philo_dead);
 	return 0;
 }
