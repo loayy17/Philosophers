@@ -6,7 +6,7 @@
 /*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 19:27:08 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/24 21:28:08 by lalhindi         ###   ########.fr       */
+/*   Updated: 2025/04/25 11:03:17 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,6 @@ int	check_dead(t_philo *philo)
 	if (get_time_ms(philo->last_meal) > philo->t_to_die)
 	{
 		philo->last_meal = get_time_ms(philo->start_time);
-		philo->is_dead = 1;
 		sem_post(philo->death);
 		return (1);
 	}
@@ -90,9 +89,9 @@ int	eat(t_philo *philo)
 	if(print_message(philo, EAT, GREEN, "🍝"))
 		return (philo->id);	
 	philo->last_meal = get_time_ms(0);
-	philo->max_meals--;
 	if (precise_usleep(philo->t_to_eat, philo))
 		return (philo->id);
+	philo->max_meals--;
 	if (throw_forks(philo))
 		return (philo->id);
 	return (0);
@@ -111,6 +110,5 @@ int	think(t_philo *philo)
 {
 	if (print_message( philo,THINK, MAGENTA, "🤔"))
 		return (1);
-
 	return (0);
 }

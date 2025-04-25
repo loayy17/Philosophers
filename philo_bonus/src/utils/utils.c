@@ -45,8 +45,9 @@ int	precise_usleep(long time_wait,t_philo *philo)
 	while (get_time_ms(start) < time_wait)
 	{
 		if (check_dead(philo))
-			return(philo->id);
-		usleep(100);
+			return(-1);
+		if (get_time_ms(philo->last_meal) > philo->t_to_die)
+			usleep(1);
 	}
 	return (0);
 }
@@ -56,18 +57,9 @@ int    print_message(t_philo *philo, char *status, char *color, char *emoji)
 	long	time;
 
 	time = get_time_ms(philo->start_time);
-	sem_wait(philo->print_lock);
-	sem_wait(philo->death);
-	if (philo->is_dead)
-	{
-		sem_post(philo->print_lock);
-		sem_post(philo->death);
-		return (1);
-	}
+	if (check_dead(philo))
+		return (-1);
 	printf("%s| %-6ld | %-3d | %-16s    |  %s  |\n"RESET,color, time, philo->id, status, emoji);
-
-	sem_post(philo->print_lock);
-	sem_post(philo->death);
 	return (0);
 }
 // {
