@@ -6,7 +6,8 @@ SRC = 	src/main.c \
 		src/philo_routine.c \
 		src/utils/init.c \
 		src/utils/utils.c \
-		src/utils/validate_args.c 
+		src/utils/validate_args.c \
+		src/philo_actions.c
 
 INCLUDE = -I./include
 OBJ = $(SRC:.c=.o)

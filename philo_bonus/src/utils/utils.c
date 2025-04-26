@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   utils.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lalhindi <lalhindi@student.42.fr>          #+#  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025-04-26 09:08:13 by lalhindi          #+#    #+#             */
+/*   Updated: 2025-04-26 09:08:13 by lalhindi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo_bonus.h"
 
 int	ft_print_error(char *msg)
@@ -41,20 +53,20 @@ int	precise_usleep(long time_wait, t_philo *philo)
 
 int	print_message(t_philo *philo, char *status, char *color, char *emoji)
 {
-    long time;
+	long	time;
 
-    sem_wait(philo->print_lock);
-    sem_wait(philo->death);
-    if (philo->is_dead)
-    {
-        sem_post(philo->death);
-        sem_post(philo->print_lock);
-        return (1);
-    }
-    time = get_time_ms(philo->start_time);
-    printf("%s| %-6ld | %-3d | %-16s    |  %s  |\n" RESET, color, time,
-        philo->id, status, emoji);
-    sem_post(philo->death);
-    sem_post(philo->print_lock);
-    return (0);
+	sem_wait(philo->print_lock);
+	sem_wait(philo->death);
+	if (philo->is_dead)
+	{
+		sem_post(philo->death);
+		sem_post(philo->print_lock);
+		return (1);
+	}
+	time = get_time_ms(philo->start_time);
+	printf("%s| %-6ld | %-3d | %-16s    |  %s  |\n" RESET, color, time,
+		philo->id, status, emoji);
+	sem_post(philo->death);
+	sem_post(philo->print_lock);
+	return (0);
 }

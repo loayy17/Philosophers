@@ -15,11 +15,32 @@
 
 #include "philo_bonus.h"
 
+int	check_len(const char *str)
+{
+	int	len;
+	int	i;
+
+	i = 0;
+	len = 0;
+	while (str[i] == '0')
+		i++;
+	while (str[i])
+	{
+		i++;
+		len++;
+	}
+	if (len >= 10)
+		return (-2);
+	return (0);
+}
+
 int	ft_atoi(const char *str)
 {
 	long	res;
 	int		sign;
 
+	if (check_len(str))
+		return (-2);
 	res = 0;
 	sign = 1;
 	while (*str == ' ' || (*str >= '\t' && *str <= '\r'))
@@ -83,5 +104,3 @@ int	validate_args(int argc, char **argv)
 	}
 	return (0);
 }
-
-

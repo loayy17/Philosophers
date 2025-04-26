@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: <you>                                        +#+  +:+       +#+        */
+/*   By: lalhindi <lalhindi@student.42.fr>          #+#  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/21                               #+#    #+#             */
-/*   Updated: 2025/04/21                               ###   ########.fr       */
+/*   Created: 2025-04-26 10:27:11 by lalhindi          #+#    #+#             */
+/*   Updated: 2025-04-26 10:27:11 by lalhindi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,67 +16,70 @@
 # include <pthread.h>
 # include <stdio.h>
 # include <stdlib.h>
-# include <unistd.h>
-# include <sys/time.h>
 # include <string.h>
+# include <sys/time.h>
+# include <unistd.h>
 
-#define RED "\033[31m"
-#define GREEN "\033[32m"
-#define YELLOW "\033[33m"
-#define BLUE "\033[34m"
-#define MAGENTA "\033[35m"
-#define RESET "\033[0m"
-#define DEAD "dead"
-#define FORK "is taking a fork"
-#define EAT "is eating"
-#define SLEEP "is sleeping"
-#define THINK "is thinking"
-
+# define RED "\033[31m"
+# define GREEN "\033[32m"
+# define YELLOW "\033[33m"
+# define BLUE "\033[34m"
+# define MAGENTA "\033[35m"
+# define RESET "\033[0m"
+# define DEAD "dead"
+# define FORK "is taking a fork"
+# define EAT "is eating"
+# define SLEEP "is sleeping"
+# define THINK "is thinking"
 
 typedef struct s_philo
 {
-	int             id;
-	int             meals_eaten;
-	long            last_meal;
-	long            start_time;
-	long            t_die;
-	long            t_eat;
-	long            t_sleep;
-	long death_time;
-	int             dead_flag;
-	pthread_t       thread;
-	pthread_mutex_t meal_lock;
-	pthread_mutex_t dead_lock;
-	pthread_mutex_t *left_fork;
-	pthread_mutex_t *right_fork;
-	pthread_mutex_t *print_lock;
-}               t_philo;
+	int				id;
+	int				meals_eaten;
+	long			last_meal;
+	long			start_time;
+	long			t_die;
+	long			t_eat;
+	long			t_sleep;
+	long			death_time;
+	int				dead_flag;
+	pthread_t		thread;
+	pthread_mutex_t	meal_lock;
+	pthread_mutex_t	dead_lock;
+	pthread_mutex_t	*left_fork;
+	pthread_mutex_t	*right_fork;
+	pthread_mutex_t	*print_lock;
+}					t_philo;
 
 /* shared data */
 typedef struct s_data
 {
-	int             n_philos;
-	int             n_must_eat;
-	long            t_die;
-	long            t_eat;
-	long            t_sleep;
-	long            start_time;
-	t_philo         *philos;
-	pthread_mutex_t *forks;
-	pthread_mutex_t  print_lock;
-}               t_data;
+	int				n_philos;
+	int				n_must_eat;
+	long			t_die;
+	long			t_eat;
+	long			t_sleep;
+	long			start_time;
+	t_philo			*philos;
+	pthread_mutex_t	*forks;
+	pthread_mutex_t	print_lock;
+}					t_data;
 
-int     validate_args(int argc, char **argv);
-int     init_data(t_data *data, int argc, char **argv);
-void    cleanup_resources(t_data *data);
+int					validate_args(int argc, char **argv);
+int					init_data(t_data *data, int argc, char **argv);
+void				cleanup_resources(t_data *data);
 
-long    get_time(long start);
-void    precise_usleep(long ms, t_philo *philo);
+long				get_time(long start);
+void				precise_usleep(long ms, t_philo *philo);
 
-int     is_dead(t_philo *philo);
-int    print_message(t_philo *philo, char *status, char *color, char *emoji);
-int			ft_atoi(const char *str);
-void   *philo_routine(void *arg);
-void ft_print_error(char *str);
+int					is_dead(t_philo *philo);
+int					print_message(t_philo *philo, char *status, char *color,
+						char *emoji);
+int					ft_atoi(const char *str);
+void				*philo_routine(void *arg);
+void				ft_print_error(char *str);
+int					even_philo(t_philo *p);
+int					odd_philo(t_philo *p);
+int					check_len(const char *str);
 
 #endif

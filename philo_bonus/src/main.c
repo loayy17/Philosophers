@@ -1,4 +1,22 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lalhindi <lalhindi@student.42.fr>          #+#  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025-04-26 09:29:18 by lalhindi          #+#    #+#             */
+/*   Updated: 2025-04-26 09:29:18 by lalhindi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo_bonus.h"
+
+void	set_values_init(int *i, int *meals_completed)
+{
+	*i = -1;
+	*meals_completed = 0;
+}
 
 void	set_all_philos_dead(t_data *data)
 {
@@ -15,26 +33,22 @@ void	set_all_philos_dead(t_data *data)
 
 void	wait_children(t_data *data)
 {
-	int		i;
-	int		status;
-	int		id;
-	int		meals_completed;
+	int	i;
+	int	status;
+	int	id;
+	int	meals_completed;
 
-	i = -1;
-	meals_completed = 0;
+	set_values_init(&i, &meals_completed);
 	while (++i < data->n_philo)
 	{
 		waitpid(-1, &status, 0);
-		id = (((status)&0xff00) >> 8);
+		id = (((status) & 0xff00) >> 8);
 		if (id != 0)
 		{
 			set_all_philos_dead(data);
 			break ;
 		}
-		else
-		{
-			meals_completed++;
-		}
+		meals_completed++;
 	}
 	if (id)
 	{
@@ -43,7 +57,7 @@ void	wait_children(t_data *data)
 	}
 	if (meals_completed == data->n_philo)
 		kill_children(data, data->n_philo);
-	cleanup_simulation(data);	
+	cleanup_simulation(data);
 }
 
 int	start_process(t_data *data)
@@ -72,15 +86,12 @@ int	start_process(t_data *data)
 
 int	main(int argc, char *argv[])
 {
-	t_data data;
+	t_data	data;
 
 	if (validate_args(argc, argv))
 		return (1);
 	if (init_data(argc, argv, &data))
-	{
-		cleanup_simulation(&data);
 		return (1);
-	}
 	if (start_process(&data))
 	{
 		cleanup_simulation(&data);

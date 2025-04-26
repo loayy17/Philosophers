@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo_bonus.h                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lalhindi <lalhindi@student.42.fr>          #+#  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025-04-26 09:21:34 by lalhindi          #+#    #+#             */
+/*   Updated: 2025-04-26 09:21:34 by lalhindi         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef PHILO_BONUS_H
 # define PHILO_BONUS_H
 
@@ -77,5 +89,8 @@ int			start_philosopher(t_philo *philo, t_data *data);
 int			validate_args(int argc, char **argv);
 int			init_data(int argc, char **argv, t_data *data);
 int			is_dead(t_philo *philo);
+void		safe_sem_close(sem_t **sem);
+void		cleanup_partial_init(t_data *data);
+void		init_sem_initial(t_data *data);
 
 #endif
