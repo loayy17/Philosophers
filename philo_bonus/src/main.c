@@ -1,29 +1,16 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: lalhindi <lalhindi@student.42amman.com>    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/12 19:26:15 by lalhindi          #+#    #+#             */
-/*   Updated: 2025/04/25 10:57:16 by lalhindi         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "philo_bonus.h"
 
-void	free_data(t_data *data)
+void	set_all_philos_dead(t_data *data)
 {
-	if (data->philos)
-		free(data->philos);
-	if (data->forks != SEM_FAILED)
-		sem_close(data->forks);
-	if (data->n_philo_eat != SEM_FAILED)
-		sem_close(data->n_philo_eat);
-	if (data->death != SEM_FAILED)
-		sem_close(data->death);
-	if (data->philos)
-		free(data->philos);
+	int	i;
+
+	i = -1;
+	while (++i < data->n_philo)
+	{
+		sem_wait(data->death);
+		data->philos[i].is_dead = 1;
+		sem_post(data->death);
+	}
 }
 
 void	wait_children(t_data *data)
@@ -41,80 +28,62 @@ void	wait_children(t_data *data)
 		id = (((status)&0xff00) >> 8);
 		if (id != 0)
 		{
-			sem_wait(data->death);
-			
-			data->philos[id - 1].death_time = get_time_ms(data->philos[id - 1].start_time);
-			kill_children(data, data->n_philo);
+			set_all_philos_dead(data);
 			break ;
 		}
 		else
 		{
 			meals_completed++;
-			if (meals_completed == data->n_philo)
-			{
-				kill_children(data, i);
-				return ;
-			}
 		}
 	}
-	printf(RED "| %-6ld | %d | is dead        | 💀 | \n" RESET, data->philos[id - 1].death_time,id);
+	if (id)
+	{
+		kill_children(data, data->n_philo);
+		sem_post(data->print_lock);
+	}
+	if (meals_completed == data->n_philo)
+		kill_children(data, data->n_philo);
+	cleanup_simulation(data);	
 }
 
 int	start_process(t_data *data)
 {
 	int	i;
-	int	philo_broken;
 
 	i = -1;
-	philo_broken = 0;
 	while (++i < data->n_philo)
 	{
 		data->philos[i].pid = fork();
 		if (data->philos[i].pid < 0)
 		{
 			kill_children(data, i);
-			ft_print_error("Error: Failed to create process\n");
+			ft_print_error("Error: Fork failed\n");
 			return (1);
 		}
 		if (data->philos[i].pid == 0)
 		{
-			philo_broken = start_philosopher(&data->philos[i], data);
-		}
-		if (philo_broken)
-		{
-			kill_children(data, i);
-			ft_print_error("Error: Failed to start philosopher\n");
-			return (1);
+			start_philosopher(&data->philos[i], data);
+			exit(0);
 		}
 	}
 	wait_children(data);
 	return (0);
 }
 
-int	ft_print_error(char *str)
-{
-	while (*str)
-	{
-		write(2, str, 1);
-		str++;
-	}
-	return (1);
-}
-
 int	main(int argc, char *argv[])
 {
-	t_data	data;
+	t_data data;
 
 	if (validate_args(argc, argv))
 		return (1);
 	if (init_data(argc, argv, &data))
 	{
-		free_data(&data);
+		cleanup_simulation(&data);
 		return (1);
 	}
 	if (start_process(&data))
 	{
-		free_data(&data);
+		cleanup_simulation(&data);
 		return (1);
 	}
 	cleanup_simulation(&data);
